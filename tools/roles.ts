@@ -6,7 +6,7 @@ const getName = (roles: Role[], list: string[]) =>
   roles.find((r) => list.includes(r.name.toLowerCase()))?.name.toLowerCase() ||
   '';
 
-export const getRanks = () => getDoc<DataList>('game', 'ranks');
+export const getRanks = () => getDoc<DataList>('', 'ranks');
 export const findRank = (roles: Role[]) =>
   getRanks().then((l) => l[getName(roles, Object.keys(l))]);
 

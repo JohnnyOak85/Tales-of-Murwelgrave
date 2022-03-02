@@ -24,7 +24,7 @@ const cleanUpDuel = (name: string) => {
 };
 
 const selectMonster = async (area: string) => {
-  const list = await getDoc<Monster[]>('game/areas', area);
+  const list = await getDoc<Monster[]>('areas', area);
   const chance = getRandom();
 
   if (chance < 25) {
@@ -46,7 +46,7 @@ export const clearMessage = (list: Message[], id: string) => {
 };
 
 export const spawnMonster = async (channel: TextChannel) => {
-  if (!(await docExists('game/areas', channel.name))) return;
+  if (!(await docExists('areas', channel.name))) return;
 
   const timer = setInterval(async () => {
     const monster = await selectMonster(channel.name);

@@ -3,7 +3,7 @@ import { listDocs } from '../tools/database';
 import { spawnMonster } from './monster';
 
 export const startAreas = async (channels: GuildBasedChannel[]) => {
-  const areas = await listDocs('game/areas');
+  const areas = await listDocs('areas');
 
   for (const name of areas) {
     const area = channels.find(
