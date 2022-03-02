@@ -65,5 +65,3 @@ export const resetPlayer = async (guild: string, user: string) => {
 
   saveDoc(doc, guild, user);
 };
-
-export const recordPlayers = () => {};

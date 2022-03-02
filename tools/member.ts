@@ -1,15 +1,17 @@
 import { GuildMember } from 'discord.js';
+import { GAME_ROLES } from '../config';
+import { saveDoc } from './database';
 
-const list = [''];
-
-const filterRoles = (member: GuildMember) => [
-  ...member.roles.cache.filter((r) => list.includes(r.name)).values(),
+export const filterRoles = (member: GuildMember) => [
+  ...member.roles.cache.filter((r) => GAME_ROLES.includes(r.id)).values(),
 ];
 
 export const recordMembers = (members: GuildMember[]) => {
   for (const member of members) {
-    if (filterRoles(member).length) {
-      const player = {
+    if (!filterRoles(member).length) continue;
+
+    saveDoc(
+      {
         attack: 15,
         bestiary: [],
         defense: 15,
@@ -21,7 +23,9 @@ export const recordMembers = (members: GuildMember[]) => {
         messages: 0,
         name: member.nickname,
         wins: 0,
-      };
-    }
+      },
+      member.guild.id,
+      member.id
+    );
   }
 };

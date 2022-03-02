@@ -2,10 +2,11 @@ import { GuildMember, Message, TextChannel } from 'discord.js';
 import { checkWord } from './raffle';
 import { checkRepeats, getBool, logError } from '../tools/utils';
 import { executeCommand } from '../tools/commands';
-import { EVENTS_CHANNEL, GAME_ROLES } from '../config';
+import { EVENTS_CHANNEL } from '../config';
 import { getPlayer } from './player';
 import { buildEmbed } from '../tools/embed';
 import { levelUp } from './rank';
+import { filterRoles } from '../tools/member';
 
 const incrementMessages = async (
   wonRaffle: boolean,
@@ -13,12 +14,9 @@ const incrementMessages = async (
   channel: TextChannel
 ) => {
   const doc = await getPlayer(player.guild.id, player.id);
-  const roles = [
-    ...player.roles.cache.filter((r) => GAME_ROLES.includes(r.id)).values(),
-  ];
   let luckBoost = 0;
 
-  if (!doc || !roles.length || doc.level >= 50) return;
+  if (!doc || !filterRoles(player).length || doc.level >= 50) return;
 
   doc.level = doc.level || 1;
   doc.messages = (doc.messages || 1) + 1;
