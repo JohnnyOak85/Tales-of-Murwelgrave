@@ -7,6 +7,7 @@ import { getPlayer } from './player';
 import { buildEmbed } from '../tools/embed';
 import { levelUp } from './rank';
 import { hasRoles } from '../tools/member';
+import { saveDoc } from '../tools/database';
 
 const incrementMessages = async (
   wonRaffle: boolean,
@@ -19,7 +20,7 @@ const incrementMessages = async (
   if (!doc || !hasRoles(player) || doc.level >= 50) return;
 
   doc.level = doc.level || 1;
-  doc.messages = (doc.messages || 1) + 1;
+  doc.messages = (doc.messages || 0) + 1;
 
   if (wonRaffle) {
     luckBoost = luckBoost + 1;
@@ -44,6 +45,7 @@ const incrementMessages = async (
     channel.send({ embeds: [embed] });
   }
 
+  saveDoc(doc, player.guild.id, player.id);
   levelUp(doc, channel, doc.messages, '');
 };
 
