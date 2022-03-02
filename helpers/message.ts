@@ -56,11 +56,11 @@ export const checkIncomingMessage = async (message: Message) => {
   if (message.channel.type === 'DM' || message.author.bot || !message.guild)
     return;
 
-  const channel = await message.guild.channels.fetch(EVENTS_CHANNEL);
-
-  if (channel?.type !== 'GUILD_TEXT' || !message.member) return;
-
   try {
+    const channel = await message.guild.channels.fetch(EVENTS_CHANNEL);
+
+    if (channel?.type !== 'GUILD_TEXT' || !message.member) return;
+
     incrementMessages(
       checkWord(message.content.split(' ')),
       message.member,
