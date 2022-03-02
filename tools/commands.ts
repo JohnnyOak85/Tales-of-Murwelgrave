@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { readdirSync } from 'fs-extra';
+import { GAME_CATEGORY, PREFIX } from '../config';
 import { CollectionFactory } from './collection.factory';
-import { PREFIX } from '../config.json';
 
 const commands = new CollectionFactory<{
   description: string;
@@ -27,6 +27,12 @@ export const setCommands = () => {
 
 export const executeCommand = (message: Message) => {
   try {
+    if (
+      message.guild?.channels.cache.find((c) => c.id === message.channel.id)
+        ?.parentId !== GAME_CATEGORY
+    )
+      return;
+
     const args = message.content.slice(PREFIX.length).trim().split(/ +/g);
     const command = commands.getItem(args.shift()?.toLowerCase() || '');
 

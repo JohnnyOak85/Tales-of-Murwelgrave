@@ -1,9 +1,12 @@
 import { TextChannel } from 'discord.js';
+import { BOSSES } from '../config';
 import { findDoc, saveDoc } from '../tools/database';
 import { addRole } from '../tools/roles';
 import { Duelist } from './interfaces';
-import { BOSSES } from '../config.json';
 import { getBuffs, getDeBuffs } from './results';
+
+export const getPlayer = (guild: string, user: string) =>
+  findDoc<Duelist>(guild, user);
 
 export const getStats = async (guild: string, user: string) => {
   const player = await findDoc<Duelist>(guild, user);

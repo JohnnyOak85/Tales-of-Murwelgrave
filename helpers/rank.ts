@@ -1,11 +1,11 @@
 import { GuildMember, Role, TextChannel } from 'discord.js';
+import { BOSSES } from '../config';
 import { findDoc } from '../tools/database';
 import { buildEmbed } from '../tools/embed';
 import { addRole, bulkRemoveRoles, findRank, getRanks } from '../tools/roles';
 import { getRandom, increment } from '../tools/utils';
 import { Duelist } from './interfaces';
 import { recordWinner } from './save';
-import { BOSSES } from '../config.json';
 
 const rankUp = async (member: GuildMember, level: number) => {
   if (level !== 40 && level !== 20) return;
@@ -33,13 +33,14 @@ const rankUp = async (member: GuildMember, level: number) => {
 export const levelUp = async (
   winner: Duelist,
   channel: TextChannel,
+  incrControl: number,
   reply: string
 ) => {
   const currentLevel = winner.level;
 
   if (!reply || currentLevel >= 50) return;
 
-  winner.level = increment(winner.attack + winner.defense, winner.level);
+  winner.level = increment(incrControl, winner.level);
 
   if (winner.level > currentLevel) {
     const gain = getRandom(winner.level * 4, winner.level);

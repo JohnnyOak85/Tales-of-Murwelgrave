@@ -61,7 +61,7 @@ export const getBuffs = (
     player.bestiary.push(adversary.name);
   }
 
-  levelUp(player, channel, reply);
+  levelUp(player, channel, player.attack + player.defense, reply);
 };
 
 export const getDeBuffs = (player: Duelist, channel: TextChannel) => {
