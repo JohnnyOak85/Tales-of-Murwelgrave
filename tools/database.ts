@@ -1,5 +1,5 @@
 import { ensureDir, readdir, readJSON, writeJSON } from 'fs-extra';
-import { DATABASE_DIR } from '../config.json';
+import { DATABASE_DIR } from '../config';
 
 ensureDir(DATABASE_DIR);
 

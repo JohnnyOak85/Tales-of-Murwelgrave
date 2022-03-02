@@ -1,8 +1,8 @@
 import { TextChannel } from 'discord.js';
 import { Duelist } from './interfaces';
 import { getRandom } from '../tools/utils';
-import { DAMAGE_CONTROL } from '../config.json';
 import { getResults } from './player';
+import { DAMAGE_CONTROL } from '../config';
 
 const getBoost = (attribute: number, boost: number) => {
   if (boost < 21) {

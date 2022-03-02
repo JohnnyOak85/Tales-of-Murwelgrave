@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { createLogger, format, transports } from 'winston';
-import { LEVEL_CONTROL } from '../config.json';
+import { LEVEL_CONTROL } from '../config';
 
 const logger = createLogger({
   level: 'info',

@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
+import { ARENA } from '../config';
 import { issueChallenge } from '../helpers/arena';
 import { logError } from '../tools/utils';
-import { ARENA } from '../config.json';
 
 module.exports = {
   name: 'challenge',
