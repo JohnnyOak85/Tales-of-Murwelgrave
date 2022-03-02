@@ -19,7 +19,7 @@ The bot will need a config file. Within it, you must provide the following varia
 It also assumes these files exist within the database:
 - `ranks.json` -> the name of a role with it's corresponding upgrade. Eg. {"role1": "role2"}
 - `raffle.json` -> A string array filled with random words of your choice.
-- `areas` -> A folder containing json files with arrays of Monster type objects.
+- `areas` -> A folder containing json files with arrays of Monster type objects. The names of the file must coincide with existing channels.
 
 ## Commands
 
