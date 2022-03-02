@@ -52,21 +52,24 @@ export const clearMessage = (list: Message[], id: string) => {
   message?.delete();
 };
 
+export const checkPlayer = async (message: Message) => {
+  const channel = await message.guild?.channels.fetch(EVENTS_CHANNEL);
+
+  if (channel?.type !== 'GUILD_TEXT' || !message.member) return;
+
+  incrementMessages(
+    checkWord(message.content.split(' ')),
+    message.member,
+    channel
+  );
+};
+
 export const checkIncomingMessage = async (message: Message) => {
   if (message.channel.type === 'DM' || message.author.bot || !message.guild)
     return;
 
   try {
-    const channel = await message.guild.channels.fetch(EVENTS_CHANNEL);
-
-    if (channel?.type !== 'GUILD_TEXT' || !message.member) return;
-
-    incrementMessages(
-      checkWord(message.content.split(' ')),
-      message.member,
-      channel
-    );
-
+    checkPlayer(message);
     executeCommand(message);
   } catch (error) {
     logError(error);
