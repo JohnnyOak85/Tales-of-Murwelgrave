@@ -1,17 +1,19 @@
-import { GuildBasedChannel, TextChannel } from 'discord.js';
+import { GuildChannelManager, TextChannel } from 'discord.js';
 import { listDocs } from '../tools/database';
 import { spawnMonster } from './monster';
 
-export const startAreas = async (channels: GuildBasedChannel[]) => {
-  const areas = await listDocs('areas');
+const getChannels = async (manager: GuildChannelManager) =>
+  manager
+    .fetch()
+    .then((l) => [...l.values()].filter((c) => c.type === 'GUILD_TEXT'));
 
-  for (const name of areas) {
-    const area = channels.find(
-      (channel) => channel.name === name && channel.type === 'GUILD_TEXT'
-    );
+const getAreas = async (manager: GuildChannelManager) =>
+  listDocs('areas').then((l) =>
+    getChannels(manager).then((c) => c.filter((c) => l.includes(c.name)))
+  );
 
-    if (!area) continue;
-
+export const startAreas = async (manager: GuildChannelManager) => {
+  for (const area of await getAreas(manager)) {
     spawnMonster(area as TextChannel);
   }
 };

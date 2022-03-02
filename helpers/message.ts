@@ -6,7 +6,7 @@ import { EVENTS_CHANNEL } from '../config';
 import { getPlayer } from './player';
 import { buildEmbed } from '../tools/embed';
 import { levelUp } from './rank';
-import { filterRoles } from '../tools/member';
+import { hasRoles } from '../tools/member';
 
 const incrementMessages = async (
   wonRaffle: boolean,
@@ -16,7 +16,7 @@ const incrementMessages = async (
   const doc = await getPlayer(player.guild.id, player.id);
   let luckBoost = 0;
 
-  if (!doc || !filterRoles(player).length || doc.level >= 50) return;
+  if (!doc || !hasRoles(player) || doc.level >= 50) return;
 
   doc.level = doc.level || 1;
   doc.messages = (doc.messages || 1) + 1;
