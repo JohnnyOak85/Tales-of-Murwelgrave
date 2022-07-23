@@ -3,8 +3,8 @@ import { startAreas } from '../helpers/game';
 import { startRaffle } from '../helpers/raffle';
 import { setCommands } from './commands';
 import { ensureDatabase } from './database';
+import { logError, logInfo } from './logger';
 import { recordMembers } from './member';
-import { logError, logInfo } from './utils';
 
 export const start = (guilds: Guild[]) => {
   try {

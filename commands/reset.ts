@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { resetPlayer } from '../helpers/player';
-import { logError } from '../tools/utils';
+import { logError } from '../tools/logger';
 
 module.exports = {
   name: 'reset',

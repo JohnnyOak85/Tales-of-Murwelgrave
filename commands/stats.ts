@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
-import { getStats } from '../helpers/player';
-import { logError } from '../tools/utils';
+import { getPlayerStats } from '../helpers/player';
+import { logError } from '../tools/logger';
 
 module.exports = {
   name: 'stats',
@@ -8,7 +8,7 @@ module.exports = {
   usage: ' ',
   execute: async (message: Message) => {
     try {
-      message.reply(await getStats(message.guild?.id || '', message.author.id));
+      message.reply(await getPlayerStats(message.guild?.id || '', message.author.id));
     } catch (error) {
       logError(error);
     }

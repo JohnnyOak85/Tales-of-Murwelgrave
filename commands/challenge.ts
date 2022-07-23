@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { ARENA } from '../config';
 import { issueChallenge } from '../helpers/arena';
-import { logError } from '../tools/utils';
+import { logError } from '../tools/logger';
 
 module.exports = {
   name: 'challenge',
@@ -15,8 +15,9 @@ module.exports = {
         !mentions.length ||
         message.channel.id !== ARENA ||
         message.channel.type !== 'GUILD_TEXT'
-      )
+      ) {
         return;
+      }
 
       if (message.author.id === mentions[0].id) {
         message.reply('this is not the way to challenge yourself.');

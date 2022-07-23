@@ -1,41 +1,44 @@
-import { GuildMember, Role } from 'discord.js';
-import { DataList } from '../helpers/interfaces';
-import { getDoc } from './database';
+import { GuildMember, RoleManager } from 'discord.js';
+import { GAME_AREAS, LOWEST_ROLE } from '../config';
+import { ROLES } from '../configurations/rank.config';
+import { updateChannels } from './channels';
 
-const getName = (roles: Role[], list: string[]) =>
-  roles.find((r) => list.includes(r.name.toLowerCase()))?.name.toLowerCase() ||
-  '';
+const getRoles = async (m: RoleManager) => (await m.fetch()).map(x => x)
 
-export const getRanks = () => getDoc<DataList>('', 'ranks');
-export const findRank = (roles: Role[]) =>
-  getRanks().then((l) => l[getName(roles, Object.keys(l))]);
+export const findRole = async (m: RoleManager, name: string) => (await getRoles(m)).find((r) => r.name.toLowerCase().includes(name.toLowerCase()));
 
-export const addRole = async (
-  roles: Role[],
-  members: GuildMember[],
-  roleName: string,
-  memberId: string
-) => {
-  const role = roles.find((r) =>
-    r.name.toLowerCase().includes(roleName.toLowerCase())
-  );
-  const member = members.find((m) => m.id === memberId);
+export const addRoles = async (member: GuildMember, roles: string[]) => {
+  for (const name of roles) {
+    const role = await findRole(member.guild.roles, name);
 
-  if (!roleName || !role || !member) return;
+    if (!role) continue;
 
-  member.roles.add(role);
-};
+    member.roles.add(role);
+  }
+}
 
-export const bulkRemoveRoles = (
-  member: GuildMember,
-  roles: Role[],
-  list: string[]
-) => {
-  for (const roleId of list) {
-    const role = roles.find((r) => r.name.toLowerCase() === roleId);
+export const removeRoles = async (member: GuildMember, roles: string[]) => {
+  for (const name of roles) {
+    const role = await findRole(member.guild.roles, name);
 
-    if (!role || !member.roles.cache.find((r) => r === role)) continue;
+    if (!role) continue;
 
     member.roles.remove(role);
   }
 };
+
+export const createRoles = async (manager: RoleManager) => {
+  const roles = await getRoles(manager);
+
+  for (const name of ROLES) {
+    if (roles.find(r => r.name === name)) continue;
+
+    const role = await manager.create({
+      name,
+      position: ROLES.indexOf(name) + 1 + LOWEST_ROLE,
+    })
+
+    updateChannels(manager.guild.channels, GAME_AREAS, role.id)
+  }
+  manager.create()
+}

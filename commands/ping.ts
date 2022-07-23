@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { logError } from '../tools/utils';
+import { logError } from '../tools/logger';
 
 module.exports = {
   name: 'ping',

@@ -1,17 +1,15 @@
-import { Message, TextChannel } from 'discord.js';
-import { CollectionFactory } from '../tools/collection.factory';
+import { ColorResolvable, TextChannel } from 'discord.js';
+import { CollectionFactory as Collection } from '../tools/collection.factory';
 import { Duelist } from './interfaces';
-import { ensureDuelist } from './player';
-import { getRandom } from '../tools/utils';
-import { docExists, getDoc } from '../tools/database';
+import { ensurePlayer } from './player';
 import { buildEmbed } from '../tools/embed';
 import { startRounds } from './duel';
+import { BASE_URL } from '../configurations/monster.config';
+import { clearMessage } from './message';
+import { pickMonster } from './monster.factory';
+import { addBattle, isBattling } from './battle';
 
-interface Monster extends Duelist {
-  thumb: string;
-}
-
-const monsters = new CollectionFactory<{
+const monsters = new Collection<{
   id: string;
   monster: Duelist;
   timer: NodeJS.Timeout;
@@ -20,41 +18,21 @@ const monsters = new CollectionFactory<{
 const cleanUpDuel = (name: string) => {
   const timer = monsters.getItem(name)?.timer;
 
-  if (timer) monsters.clearTimer(name, timer);
-};
-
-const selectMonster = async (area: string) => {
-  const list = await getDoc<Monster[]>('areas', area);
-  const chance = getRandom();
-
-  if (chance < 25) {
-    return list[0];
-  } else if (chance < 55) {
-    return list[getRandom(4)];
-  } else if (chance < 75) {
-    return list[getRandom(6, 5)];
-  } else if (chance < 95) {
-    return list[getRandom(8, 7)];
-  } else {
-    return list[9];
+  if (timer) {
+    monsters.clearTimer(name, timer);
   }
 };
 
-export const clearMessage = (list: Message[], id: string) => {
-  const message = list.find((m) => m.id === id);
-  message?.delete();
-};
 
 export const spawnMonster = async (channel: TextChannel) => {
-  if (!(await docExists('areas', channel.name))) return;
-
   const timer = setInterval(async () => {
-    const monster = await selectMonster(channel.name);
+    const monster = pickMonster(channel.name);
+
     const embed = buildEmbed({
-      color: '#ff2050',
-      description: `A ${monster.name} appears!`,
-      title: '**MONSTER ATTACK**',
-      thumb: monster.thumb,
+      color: monster.color as ColorResolvable,
+      description: `A level ${monster.level} ${monster.name} appears!`,
+      title: monster.rank === 4 ? '**BOSS ATTACK**' : '**MONSTER ATTACK**',
+      thumb: `${BASE_URL}/${monster.id}.png`,
     });
 
     clearMessage(
@@ -72,10 +50,15 @@ export const engageMonster = async (
   channel: TextChannel,
   challengerId: string
 ) => {
+  if (isBattling(challengerId)) {
+    return;
+  }
+
   const monster = monsters.getItem(channel.name)?.monster;
-  const challenger = await ensureDuelist(channel.guild.id, challengerId);
+  const challenger = await ensurePlayer(channel.guild.id, challengerId);
 
   cleanUpDuel(channel.name);
+  addBattle(challengerId, challengerId);
 
   if (!monster || !challenger) return;
 

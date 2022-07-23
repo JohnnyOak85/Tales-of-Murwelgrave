@@ -1,42 +1,28 @@
 import { TextChannel } from 'discord.js';
-import { CollectionFactory } from '../tools/collection.factory';
 import { buildEmbed } from '../tools/embed';
 import { getBool } from '../tools/utils';
+import { addBattle } from './battle';
 import { startRounds } from './duel';
-import { ensureDuelist } from './player';
-
-const duels = new CollectionFactory<{
-  challenger: string;
-  timer: NodeJS.Timeout;
-}>();
-
-const cleanUpDuel = (name: string) => {
-  const timer = duels.getItem(name)?.timer;
-
-  if (timer) duels.clearTimer(name, timer);
-};
+import { addDuel, cleanUpDuel, getDuel, isValid } from './duels.collector';
+import { ensurePlayer } from './player';
 
 export const acceptChallenge = async (
   channel: TextChannel,
   defenderId: string
 ) => {
   try {
-    const duel = duels.getItem(defenderId);
-    let attacker;
-    let defender;
+    const duel = getDuel(defenderId);
 
     if (!duel) {
       channel.send(`<@${defenderId}> there are no open challenges for you.`);
       return;
     }
 
-    if (getBool()) {
-      attacker = await ensureDuelist(channel.guild.id, duel.challenger);
-      defender = await ensureDuelist(channel.guild.id, defenderId);
-    } else {
-      attacker = await ensureDuelist(channel.guild.id, defenderId);
-      defender = await ensureDuelist(channel.guild.id, duel.challenger);
-    }
+    addBattle(duel.challenger, defenderId);
+
+    const heads = getBool();
+    const attacker = await ensurePlayer(channel.guild.id, heads ? duel.challenger : defenderId);
+    const defender = await ensurePlayer(channel.guild.id, heads ? defenderId : duel.challenger);
 
     if (!attacker || !defender) return;
 
@@ -44,27 +30,17 @@ export const acceptChallenge = async (
 
     cleanUpDuel(defenderId);
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
 
-export const issueChallenge = async (
-  channel: TextChannel,
-  challenger: string,
-  defender: string
-) => {
+export const issueChallenge = async (channel: TextChannel, challenger: string, defender: string) => {
   try {
-    if (
-      duels.findItem(defender) ||
-      duels.getList().find((item) => item.challenger === defender)
-    ) {
-      channel.send('This fighter already has an open challenge.');
-      return;
-    } else if (
-      duels.findItem(challenger) ||
-      duels.getList().find((item) => item.challenger === challenger)
-    ) {
-      channel.send('You already have an open challenge.');
+    const res = isValid(challenger, defender);
+
+    if (res) {
+      channel.send(res)
       return;
     }
 
@@ -78,13 +54,7 @@ export const issueChallenge = async (
       ],
     });
 
-    duels.addItem(defender, {
-      challenger,
-      timer: setTimeout(() => {
-        duels.deleteItem(defender);
-        channel.send(`<@${challenger}>'s challenge has expired!`);
-      }, 300000),
-    });
+    addDuel(channel, challenger, defender);
   } catch (error) {
     throw error;
   }

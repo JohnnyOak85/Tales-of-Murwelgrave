@@ -1,18 +1,76 @@
-import { TextChannel } from 'discord.js';
+import { GuildMember, TextChannel } from 'discord.js';
+import { LUCK_CAP, STAT_CAP } from '../configurations/main.config';
 import { getBool, getRandom } from '../tools/utils';
-import { Duelist } from './interfaces';
+import { Duelist, Player } from './interfaces';
 import { checkBoss, levelUp } from './rank';
-import { recordLoser } from './save';
+import { recordPlayer } from './save';
 
-const getLuckBoost = (player: Duelist, reply: string) => {
-  player.luck = player.luck + 1;
-  reply = `${reply} +1 luck.`;
+const isLucky = (player: Player, adversary: Duelist) => player.level + player.attack + player.defense <
+  adversary.level + adversary.attack + adversary.defense &&
+  player.luck < LUCK_CAP;
 
-  return reply;
+const boostLuck = (player: Player, adversary: Duelist) => {
+  if (!isLucky(player, adversary)) {
+    return '';
+  }
+
+  player.luck += 1;
+
+  return `**+1 luck.**`;
 };
 
+const splitExp = (attacker: boolean, experience: number) => {
+  const split = getRandom(experience);
+  const bigSplit = attacker ? split > Math.max(1, experience / 2) : split > experience / 2;
+
+  return {
+    attackBoost: attacker
+      ? bigSplit ? split : Math.max(1, experience - split)
+      : bigSplit ? Math.max(1, experience - split) : split,
+    defenseBoost: attacker
+      ? bigSplit ? Math.max(1, experience - split) : split
+      : bigSplit ? split : Math.max(1, experience - split)
+  }
+}
+
+const boostStat = (player: Player, stat: 'attack' | 'defense', boost: number) => {
+  if (player[stat] >= STAT_CAP) {
+    return '';
+  }
+
+  player[stat] += boost;
+
+  return `**+${boost} ${stat}.**`;
+
+}
+
+const deBuffStat = (player: Player, stat: 'attack' | 'defense') => {
+  const deBuff = getBool() ? 1 : 2;
+
+  if (player[stat] <= STAT_CAP) {
+    return ''
+  }
+
+  player[stat] -= deBuff;
+
+  return `**-${deBuff} ${stat}.**`
+}
+
+const checkMonster = (player: Player, adversary: Duelist, member: GuildMember | undefined) => {
+  if ((!adversary.id.includes('_')
+    || !isNaN(parseInt(adversary.id, 10))
+    && player.bestiary.includes(adversary.name)
+  )) {
+    return ''
+  }
+
+  player.bestiary.push(adversary.name);
+
+  return checkBoss(member, adversary.name)
+}
+
 export const getBuffs = (
-  player: Duelist,
+  player: Player,
   experience: number,
   attacker: boolean,
   adversary: Duelist,
@@ -20,74 +78,24 @@ export const getBuffs = (
 ) => {
   if (player.id.includes('_') || isNaN(parseInt(player.id, 10))) return;
 
-  const split = getRandom(experience);
-  let reply = `**${player.name}** wins!`;
-  let attackBoost = 0;
-  let defenseBoost = 0;
+  const reply = [`**${player.name}** wins!`];
+  const { attackBoost, defenseBoost } = splitExp(attacker, experience);
 
-  if (attacker) {
-    const bigSplit = split > Math.max(1, experience / 2);
-
-    attackBoost = bigSplit ? split : Math.max(1, experience - split);
-    defenseBoost = bigSplit ? Math.max(1, experience - split) : split;
-  } else {
-    const bigSplit = split > experience / 2;
-
-    attackBoost = bigSplit ? Math.max(1, experience - split) : split;
-    defenseBoost = bigSplit ? split : Math.max(1, experience - split);
-  }
-
-  player.attack = player.attack + attackBoost;
-  player.defense = player.defense + defenseBoost;
-
-  reply = `${reply}\n**+${attackBoost} attack. +${defenseBoost} defense.`;
-
-  if (
-    player.level + player.attack + player.defense <
-    adversary.level + adversary.attack + adversary.defense
-  ) {
-    reply = getLuckBoost(player, reply);
-  }
-
-  reply = checkBoss(
-    player,
-    adversary.name,
-    [...channel.guild.roles.cache.values()],
-    [...channel.guild.members.cache.values()],
-    reply
-  );
-
-  if (!player.bestiary.includes(adversary.name)) {
-    player.bestiary.push(adversary.name);
-  }
+  reply.push(boostStat(player, 'attack', attackBoost));
+  reply.push(boostStat(player, 'defense', defenseBoost));
+  reply.push(boostLuck(player, adversary));
+  reply.push(checkMonster(player, adversary, channel.guild.members.cache.find((members) => members.id === player.id)))
 
   levelUp(player, channel, player.attack + player.defense, reply);
 };
 
-export const getDeBuffs = (player: Duelist, channel: TextChannel) => {
-  if (player.id.includes('_') || isNaN(parseInt(player.id, 10))) return;
+export const getDeBuffs = (player: Player, channel: TextChannel) => {
+  const reply = [`**${player.name} lost!**`];
 
-  let deBuffs = '';
+  reply.push(deBuffStat(player, 'attack'));
+  reply.push(deBuffStat(player, 'defense'));
 
-  const attackDeBuff = getBool() ? 1 : 2;
-  const defenseDeBuff = getBool() ? 1 : 2;
+  channel.send(reply.filter(x => x).join('\n'));
 
-  player.attack = player.attack - attackDeBuff;
-  player.defense = player.defense - defenseDeBuff;
-
-  if (player.attack <= 15) {
-    player.attack = 15;
-  } else {
-    deBuffs = `${deBuffs}-${attackDeBuff} attack.`;
-  }
-
-  if (player.defense <= 15) {
-    player.defense = 15;
-  } else {
-    deBuffs = `${deBuffs} -${defenseDeBuff} defense.`;
-  }
-
-  channel.send(`**${player.name}** lost!${deBuffs ? `\n**${deBuffs}**` : ''}`);
-
-  recordLoser(player, channel.guild.id);
+  recordPlayer(player, channel.guild.id, false);
 };

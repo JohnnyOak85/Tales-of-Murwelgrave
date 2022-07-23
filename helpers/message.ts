@@ -1,60 +1,62 @@
 import { GuildMember, Message, TextChannel } from 'discord.js';
 import { checkWord } from './raffle';
-import { checkRepeats, getBool, logError } from '../tools/utils';
+import { checkRepeats, getBool } from '../tools/utils';
 import { executeCommand } from '../tools/commands';
 import { EVENTS_CHANNEL } from '../config';
-import { getPlayer } from './player';
+import { ensurePlayer } from './player';
 import { buildEmbed } from '../tools/embed';
-import { levelUp } from './rank';
 import { hasRoles } from '../tools/member';
 import { saveDoc } from '../tools/database';
+import { LEVEL_CONTROL, LUCK_CAP } from '../configurations/main.config';
+import { logError } from '../tools/logger';
 
 const incrementMessages = async (
   wonRaffle: boolean,
-  player: GuildMember,
+  member: GuildMember,
   channel: TextChannel
 ) => {
-  const doc = await getPlayer(player.guild.id, player.id);
+  const player = await ensurePlayer(member.guild.id, member.id);
   let luckBoost = 0;
 
-  if (!doc || !hasRoles(player) || doc.level >= 50) return;
+  if (player.luck >= LUCK_CAP || !hasRoles(member) || player.level >= LEVEL_CONTROL) {
+    return;
+  }
 
-  doc.level = doc.level || 1;
-  doc.messages = (doc.messages || 0) + 1;
+  player.level = player.level || 1;
+  player.messages = (player.messages || 0) + 1;
 
   if (wonRaffle) {
     luckBoost = luckBoost + 1;
   }
 
   if (
-    doc.messages.toString().length > 2 &&
-    checkRepeats(doc.messages.toString()) &&
+    player.messages.toString().length > 2 &&
+    checkRepeats(player.messages.toString()) &&
     getBool()
   ) {
     luckBoost = luckBoost + 1;
   }
 
-  doc.luck = doc.luck + luckBoost;
+  player.luck = player.luck + luckBoost;
 
   if (luckBoost) {
     const embed = buildEmbed({
-      description: `<@${doc.id}>\n**+${luckBoost} luck!**`,
+      description: `<@${player.id}>\n**+${luckBoost} luck!**`,
       title: 'You just won the daily raffle!',
     });
 
     channel.send({ embeds: [embed] });
   }
 
-  saveDoc(doc, player.guild.id, player.id);
-  levelUp(doc, channel, doc.messages, '');
+  saveDoc(player, member.guild.id, member.id);
 };
 
 export const clearMessage = (list: Message[], id: string) => {
-  const message = list.find((m) => m.id === id);
+  const message = list.find((message) => message.id === id);
   message?.delete();
 };
 
-export const checkPlayer = async (message: Message) => {
+const checkPlayer = async (message: Message) => {
   const channel = await message.guild?.channels.fetch(EVENTS_CHANNEL);
 
   if (channel?.type !== 'GUILD_TEXT' || !message.member) return;
@@ -67,8 +69,9 @@ export const checkPlayer = async (message: Message) => {
 };
 
 export const checkIncomingMessage = async (message: Message) => {
-  if (message.channel.type === 'DM' || message.author.bot || !message.guild)
+  if (message.channel.type === 'DM' || message.author.bot || !message.guild) {
     return;
+  }
 
   try {
     checkPlayer(message);

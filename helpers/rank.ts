@@ -1,95 +1,79 @@
-import { GuildMember, Role, TextChannel } from 'discord.js';
-import { BOSSES } from '../config';
-import { findDoc } from '../tools/database';
+import { GuildMember, TextChannel } from 'discord.js';
 import { buildEmbed } from '../tools/embed';
-import { addRole, bulkRemoveRoles, findRank, getRanks } from '../tools/roles';
+import { addRoles, removeRoles } from '../tools/roles';
 import { getRandom, increment } from '../tools/utils';
-import { Duelist } from './interfaces';
-import { recordWinner } from './save';
+import { Player } from './interfaces';
+import { recordPlayer } from './save';
+import { intersection } from 'lodash';
+import { BOSSES } from '../configurations/monster.config';
+import { RANKS } from '../configurations/rank.config';
+import { HEALTH_CAP, LEVEL_CONTROL } from '../configurations/main.config';
+import { ensurePlayer } from './player';
 
-const rankUp = async (member: GuildMember, level: number) => {
-  if (level !== 40 && level !== 20) return;
+const rankUp = async (member: GuildMember) => {
+  const currentRanks = intersection(Object.keys(RANKS), member.roles.cache.map(r => r.name.toLowerCase()));
+  const upgrade = RANKS[currentRanks[getRandom(currentRanks.length - 1, 0)]];
 
-  const name = await findRank([...member?.roles.cache.values()]);
-  const upgrade = member?.guild.roles.cache.find(
-    (r) => r.name.toLowerCase() === name
-  );
+  if (!upgrade || !member) {
+    return '';
+  }
 
-  if (!upgrade || !member) return;
+  addRoles(member, [upgrade]);
+  removeRoles(member, currentRanks);
 
-  addRole([upgrade], [member], upgrade?.name, member?.id);
-
-  const toRemove = member.guild.roles.cache.filter((r) => r !== upgrade);
-
-  bulkRemoveRoles(
-    member,
-    [...toRemove.values()],
-    Object.keys(await getRanks())
-  );
-
-  return upgrade.name;
+  return `**Rank up! -> ${upgrade}!**`;
 };
 
 export const levelUp = async (
-  winner: Duelist,
+  winner: Player,
   channel: TextChannel,
   incrControl: number,
-  reply: string
+  reply: string[]
 ) => {
   const currentLevel = winner.level;
 
-  if (!reply || currentLevel >= 50) return;
+  if (!reply || currentLevel >= LEVEL_CONTROL) return;
 
   winner.level = increment(incrControl, winner.level);
 
   if (winner.level > currentLevel) {
-    const gain = getRandom(winner.level * 4, winner.level);
-    const doc = await findDoc<Duelist>(channel.guild.id, winner.id);
+    const gain = getRandom(winner.level * 4, winner.level * 3);
+    const { health } = await ensurePlayer(channel.guild.id, winner.id);
+    const description = [`<@${winner.id}>`, `**${currentLevel} -> ${winner.level}**`].concat(reply);
 
-    winner.health = (doc?.health || 100) + gain;
+    if (winner.health < HEALTH_CAP) {
+      winner.health = (health || 100) + gain;
 
-    reply = `<@${winner.id}>\n**${currentLevel} -> ${winner.level}**\n${reply} +${gain} health.**`;
+      description.push(`**+${gain} health.**`)
+    }
 
     const member = channel.guild.members.cache.find((m) => m.id === winner.id);
 
-    if (member) {
-      const rank = await rankUp(member, winner.level);
-
-      if (rank) {
-        reply = `${reply}\n**Rank up! -> ${rank}!**`;
-      }
+    if (member && winner.level !== LEVEL_CONTROL) {
+      description.push(await rankUp(member))
     }
 
     channel.send({
       embeds: [
         buildEmbed({
-          description: reply,
+          description: description.filter(x => x).join('\n'),
           title: 'Level up!',
         }),
       ],
     });
   } else {
-    channel.send(`${reply}**`);
+    channel.send(reply.filter(x => x).join('\n'));
   }
 
-  recordWinner(winner, channel.guild.id);
+  recordPlayer(winner, channel.guild.id, true);
 };
 
-export const checkBoss = (
-  player: Duelist,
-  adversary: string,
-  roles: Role[],
-  member: GuildMember[],
-  reply: string
-) => {
-  if (
-    BOSSES.find((b) => adversary.toLowerCase().includes(b)) &&
-    !player.bestiary.includes(adversary)
-  ) {
-    addRole(roles, member, adversary.toLowerCase(), player.id);
+export const checkBoss = (member: GuildMember | undefined, boss: string) => {
+  if (member && BOSSES.find((b) => boss.toLowerCase().includes(b.toLowerCase()))) {
+    addRoles(member, [boss.toLowerCase()])
 
-    return `${reply}\nYou just defeated **${adversary}**! Congratulations!`;
-  } else {
-    return reply;
+    return `You just defeated the **${boss}**! Congratulations!`
   }
+
+  return '';
 };

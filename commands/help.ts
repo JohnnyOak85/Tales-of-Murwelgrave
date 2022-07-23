@@ -3,7 +3,7 @@ import {
   getCommandDescription,
   getCommandsDescription,
 } from '../tools/commands';
-import { logError } from '../tools/utils';
+import { logError } from '../tools/logger';
 
 module.exports = {
   name: 'help',

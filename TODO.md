@@ -1,0 +1,2 @@
+- Ensure needed roles are created.
+- Ensure needed channels are created.

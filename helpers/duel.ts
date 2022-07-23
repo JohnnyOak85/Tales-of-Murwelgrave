@@ -2,7 +2,8 @@ import { TextChannel } from 'discord.js';
 import { Duelist } from './interfaces';
 import { getRandom } from '../tools/utils';
 import { getResults } from './player';
-import { DAMAGE_CONTROL } from '../config';
+import { DAMAGE_CONTROL } from '../configurations/main.config';
+import { deleteBattle } from './battle';
 
 const getBoost = (attribute: number, boost: number) => {
   if (boost < 21) {
@@ -32,6 +33,7 @@ const battle = (attacker: Duelist, defender: Duelist, channel: TextChannel) => {
       summary.push(`**${defender.name}** defended!`);
     } else {
       defender.health = Math.max(0, defender.health - damage);
+
       summary.push(
         `**${attacker.name}** attacks! *${damage}* damage! **${defender.name}** has *${defender.health}* health.`
       );
@@ -45,6 +47,7 @@ const battle = (attacker: Duelist, defender: Duelist, channel: TextChannel) => {
 
     if (getRandom(defender.luck) >= 50) {
       attacker.health = Math.max(0, attacker.health - defender.attack);
+
       summary.push(
         `**${defender.name}** counters! *${defender.attack}* damage! **${attacker.name}** has *${attacker.health}* health.`
       );
@@ -52,6 +55,7 @@ const battle = (attacker: Duelist, defender: Duelist, channel: TextChannel) => {
       summary.push(`**${attacker.name}** follows through!`);
 
       channel.send(summary.join('\n'));
+
       return { boutWinner: attacker, boutLoser: defender };
     }
 
@@ -72,11 +76,12 @@ export const startRounds = (
   let defender = challenged;
 
   while (challenged.health > 0 && challenger.health > 0) {
-    const roundResult = battle(attacker, defender, channel);
+    const { boutLoser, boutWinner } = battle(attacker, defender, channel);
 
-    attacker = roundResult.boutWinner;
-    defender = roundResult.boutLoser;
+    attacker = boutWinner;
+    defender = boutLoser;
   }
 
   getResults(challenger, challenged, channel);
+  deleteBattle(challenger.id);
 };

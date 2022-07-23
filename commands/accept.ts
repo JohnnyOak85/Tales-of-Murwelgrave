@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { ARENA } from '../config';
 import { acceptChallenge } from '../helpers/arena';
-import { logError } from '../tools/utils';
+import { logError } from '../tools/logger';
 
 module.exports = {
   name: 'accept',

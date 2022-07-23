@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { engageMonster } from '../helpers/monster';
-import { logError } from '../tools/utils';
+import { logError } from '../tools/logger';
 
 module.exports = {
   name: 'attack',

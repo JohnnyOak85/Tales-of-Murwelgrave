@@ -1,28 +1,17 @@
-import { findDoc, saveDoc } from '../tools/database';
-import { Duelist } from './interfaces';
+import { saveDoc } from '../tools/database';
+import { Player } from './interfaces';
+import { ensurePlayer } from './player';
 
-export const recordWinner = async (winner: Duelist, guild: string) => {
-  const doc = await findDoc<Duelist>(guild, winner.id);
+export const recordPlayer = async (player: Player, guild: string, winner: boolean) => {
+  const playerDoc = await ensurePlayer(guild, player.id);
+  const stat = winner ? 'wins' : 'losses';
 
-  if (!doc) return;
+  playerDoc[stat] += 1;
+  playerDoc.attack = player.attack;
+  playerDoc.bestiary = player.bestiary;
+  playerDoc.defense = player.defense;
+  playerDoc.health = player.health < playerDoc.health ? playerDoc.health : player.health;
+  playerDoc.level = player.level;
 
-  winner.health =
-    winner.health < (doc?.health || 100) ? doc?.health || 100 : winner.health;
-
-  doc.wins = (doc?.wins || 0) + 1;
-
-  saveDoc(Object.assign(doc, winner), guild, winner.id);
-};
-
-export const recordLoser = async (loser: Duelist, guild: string) => {
-  const doc = await findDoc<Duelist>(guild, loser.id);
-
-  if (!doc) return;
-
-  loser.health =
-    loser.health < (doc?.health || 100) ? doc?.health || 100 : loser.health;
-
-  doc.losses = (doc?.losses || 0) + 1;
-
-  saveDoc(Object.assign(doc, loser), guild, loser.id);
+  saveDoc(playerDoc, guild, player.id);
 };

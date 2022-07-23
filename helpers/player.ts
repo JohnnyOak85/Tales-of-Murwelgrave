@@ -1,31 +1,31 @@
 import { TextChannel } from 'discord.js';
-import { BOSSES } from '../config';
+import { BASE_HEALTH, BASE_STAT, DEFAULT_NAME } from '../configurations/main.config';
 import { findDoc, saveDoc } from '../tools/database';
-import { addRole } from '../tools/roles';
-import { Duelist } from './interfaces';
+import { getRandom } from '../tools/utils';
+import { Duelist, Player } from './interfaces';
 import { getBuffs, getDeBuffs } from './results';
 
-export const getPlayer = (guild: string, user: string) =>
-  findDoc<Duelist>(guild, user);
+export const getPlayerStats = async (guild: string, user: string) => {
+  const player = await ensurePlayer(guild, user);
 
-export const getStats = async (guild: string, user: string) => {
-  const player = await findDoc<Duelist>(guild, user);
-
-  return `\nLevel: ${player?.level}\nHealth: ${player?.health}\nAttack: ${player?.attack}\nDefense: ${player?.defense}\nLuck: ${player?.luck}\nWins: ${player?.wins}\nLosses: ${player?.losses}`;
+  return `\nLevel: ${player.level}\nHealth: ${player.health}\nAttack: ${player.attack}\nDefense: ${player.defense}\nLuck: ${player.luck}\nWins: ${player.wins}\nLosses: ${player.losses}`;
 };
 
-export const ensureDuelist = async (guild: string, user: string) => {
-  const duelist = await findDoc<Duelist>(guild, user);
+export const ensurePlayer = async (guild: string, user: string): Promise<Player> => {
+  const player = await findDoc<Player>(guild, user);
 
   return {
-    attack: duelist?.attack || 15,
-    bestiary: duelist?.bestiary || [],
-    defense: duelist?.defense || 15,
-    health: duelist?.health || 100,
-    id: duelist?.id || '',
-    level: duelist?.level || 1,
-    luck: duelist?.luck || 1,
-    name: duelist?.name || 'Duelist',
+    attack: player?.attack || BASE_STAT,
+    bestiary: player?.bestiary || [],
+    defense: player?.defense || BASE_STAT,
+    health: player?.health || BASE_HEALTH,
+    id: player?.id || '',
+    level: player?.level || 1,
+    losses: player?.losses || 0,
+    luck: player?.luck || 1,
+    messages: player?.messages || 0,
+    name: player?.name || DEFAULT_NAME,
+    wins: player?.wins || 0
   };
 };
 
@@ -36,32 +36,31 @@ export const getResults = async (
 ) => {
   const winner = defender.health > 0 ? defender : attacker;
   const loser = defender.health > 0 ? attacker : defender;
-  const experience = Math.max(1, Math.floor((loser.level * 2) / winner.level));
+  const experience = Math.max(1, Math.floor((loser.level * 3) / winner.level));
 
-  addRole(
-    [...channel.guild.roles.cache.values()],
-    [...channel.guild.members.cache.values()],
-    BOSSES.find((b) => loser.id.toLowerCase().includes(b)) || '',
-    winner.id
-  );
+  if (!winner.id.includes('_') && !isNaN(parseInt(winner.id, 10))) {
+    getBuffs(winner as Player, experience, winner === attacker, loser, channel);
+  }
 
-  getBuffs(winner, experience, winner === attacker, loser, channel);
-  getDeBuffs(loser, channel);
+  if (getRandom() < 6 && !loser.id.includes('_') && !isNaN(parseInt(loser.id, 10))) {
+    getDeBuffs(loser as Player, channel);
+  }
 };
 
 export const resetPlayer = async (guild: string, user: string) => {
-  const doc = await findDoc<Duelist>(guild, user);
+  const player = await ensurePlayer(guild, user);
 
-  if (!doc) return;
+  if (!player) return;
 
-  doc.attack = 15;
-  doc.defense = 15;
-  doc.health = 100;
-  doc.level = 1;
-  doc.luck = 1;
-  doc.losses = 0;
-  doc.wins = 0;
-  doc.messages = 0;
+  player.attack = BASE_STAT;
+  player.bestiary = [];
+  player.defense = BASE_STAT;
+  player.health = BASE_HEALTH;
+  player.level = 1;
+  player.losses = 0;
+  player.luck = 1;
+  player.messages = 0;
+  player.wins = 0;
 
-  saveDoc(doc, guild, user);
+  saveDoc(player, guild, user);
 };

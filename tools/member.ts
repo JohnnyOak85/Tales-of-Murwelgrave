@@ -1,25 +1,28 @@
 import { GuildMember, GuildMemberManager } from 'discord.js';
-import { GAME_ROLES } from '../config';
+import { intersection } from 'lodash';
+import { BASE_HEALTH, BASE_STAT } from '../configurations/main.config';
+import { ROLES } from '../configurations/rank.config';
 import { docExists, saveDoc } from './database';
 
-const filterRoles = (member: GuildMember) =>
-  member.roles.cache.filter((r) => GAME_ROLES.includes(r.id)).values();
+const getUserRoles = (member: GuildMember) => [...member.roles.cache.filter(role => !!role).values()];
+const getUserRoleNames = (member: GuildMember) => getUserRoles(member).map(role => role.name.toLowerCase());
+const getRoleNames = () => ROLES.map(role => role.toLowerCase())
 
 const getList = (manager: GuildMemberManager) =>
-  manager.fetch().then((l) => [...l.values()]);
+  manager.fetch().then((members) => [...members.values()]);
 
 const filterMembers = (manager: GuildMemberManager) =>
-  getList(manager).then((l) => l.filter((m) => hasRoles(m)));
+  getList(manager).then((members) => members.filter((member) => hasRoles(member)));
 
-const recordPlayer = async (member: GuildMember) => {
+const recordPlayerDoc = async (member: GuildMember) => {
   if (await docExists(member.guild.id, member.id)) return;
 
   const player = {
-    attack: 15,
+    attack: BASE_STAT,
     bestiary: [],
-    defense: 15,
+    defense: BASE_STAT,
     id: member.id,
-    health: 100,
+    health: BASE_HEALTH,
     level: 1,
     losses: 0,
     luck: 1,
@@ -32,16 +35,16 @@ const recordPlayer = async (member: GuildMember) => {
 };
 
 export const hasRoles = (member: GuildMember) =>
-  !![...filterRoles(member)].length;
+  !!intersection(getUserRoleNames(member), getRoleNames()).length
 
 export const recordMembers = async (manager: GuildMemberManager) => {
   for (const member of await filterMembers(manager)) {
-    recordPlayer(member);
+    recordPlayerDoc(member);
   }
 };
 
 export const recordChanges = async (member: GuildMember) => {
   if (!hasRoles(member)) {
-    recordPlayer(member);
+    recordPlayerDoc(member);
   }
 };

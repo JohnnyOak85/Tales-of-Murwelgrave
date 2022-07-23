@@ -3,9 +3,10 @@ import { DATABASE_DIR } from '../config';
 
 ensureDir(DATABASE_DIR);
 
-export const ensureDatabase = (guild: string) =>
+export const ensureDatabase = (guild: string) => {
   ensureDir(`${DATABASE_DIR}/${guild}`);
-  
+}
+
 export const docExists = (folder: string, doc: string) =>
   listDocs(folder).then((dir) => dir.includes(doc));
 

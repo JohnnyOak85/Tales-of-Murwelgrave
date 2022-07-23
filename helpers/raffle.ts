@@ -1,25 +1,30 @@
-import { getDoc } from '../tools/database';
+import { WORDS } from '../configurations/raffle.config';
+import { CollectionFactory as Collection } from '../tools/collection.factory';
 import { getRandom } from '../tools/utils';
 
-let ticket: string;
-let timer: NodeJS.Timeout;
+const tickets = new Collection<{
+  ticket: string,
+  timer: NodeJS.Timeout;
+}>();
 
-export const startRaffle = async () => {
-  timer = setInterval(async () => {
-    const words = await getDoc<string[]>('', 'raffle');
-    ticket = words[getRandom(words.length) - 1];
+export const startRaffle = () => {
+  const timer = setInterval(() => {
+    tickets.addItem('raffle', {
+      ticket: WORDS[getRandom(WORDS.length) - 1],
+      timer
+    })
   }, 86400000);
-};
+}
 
 export const checkWord = (words: string[]) => {
-  for (const word of words) {
-    if (ticket && ticket === word) {
-      clearTimeout(timer);
-      startRaffle();
+  const draw = tickets.getItem('raffle');
 
-      return true;
+  for (const word of words) {
+    if (draw?.ticket === word) {
+      startRaffle();
+      return true
     }
   }
 
   return false;
-};
+}

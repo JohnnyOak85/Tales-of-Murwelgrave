@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
 import { readdirSync } from 'fs-extra';
 import { GAME_CATEGORY, PREFIX } from '../config';
-import { CollectionFactory } from './collection.factory';
+import { CollectionFactory as Collection } from './collection.factory';
 
-const commands = new CollectionFactory<{
+const commands = new Collection<{
   description: string;
   execute: (message: Message, args?: string[]) => void;
   game: boolean;
@@ -28,7 +28,7 @@ export const setCommands = () => {
 export const executeCommand = (message: Message) => {
   try {
     if (
-      message.guild?.channels.cache.find((c) => c.id === message.channel.id)
+      message.guild?.channels.cache.find((channel) => channel.id === message.channel.id)
         ?.parentId !== GAME_CATEGORY
     )
       return;
