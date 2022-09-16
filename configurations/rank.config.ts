@@ -1,6 +1,14 @@
-import { DataList } from "../helpers/interfaces";
+import { DataList } from '../helpers/interfaces';
 
-export const ROLES = ['Warrior', 'Knight', 'Crusader', 'Techno Wizard', 'Technomancer', 'Death Zealot', 'Death Acolyte']
+export const ROLES = [
+    'Warrior',
+    'Knight',
+    'Crusader',
+    'Techno Wizard',
+    'Technomancer',
+    'Death Zealot',
+    'Death Acolyte'
+];
 
 export const RANKS: DataList<string> = {
     warrior: 'Knight',
@@ -8,4 +16,4 @@ export const RANKS: DataList<string> = {
     techie: 'Techno Wizard',
     'techno wizard': 'Technomancer',
     'death zealot': 'Death Acolyte'
-}
+};

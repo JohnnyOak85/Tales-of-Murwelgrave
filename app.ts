@@ -6,15 +6,17 @@ import { logError } from './tools/logger';
 import { recordChanges } from './tools/member';
 
 const bot = new Client({
-  intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_PRESENCES', 'GUILD_MEMBERS'],
+    intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent']
 });
 
 bot.login(TOKEN);
 
 bot.on('ready', () => start([...bot.guilds.cache.values()]));
-bot.on('messageCreate', async (message) => checkIncomingMessage(message));
-bot.on('guildMemberUpdate', (a, member) => recordChanges(member));
+bot.on('messageCreate', async message => checkIncomingMessage(message));
+bot.on('guildMemberUpdate', (a, member) => {
+    recordChanges(member);
+});
 
-bot.on('error', (error) => {
-  logError(error);
+bot.on('error', error => {
+    logError(error);
 });

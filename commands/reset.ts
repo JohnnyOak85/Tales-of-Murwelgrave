@@ -1,24 +1,32 @@
 import { Message } from 'discord.js';
+import { GAME_MANAGER } from '../config';
 import { resetPlayer } from '../helpers/player';
 import { logError } from '../tools/logger';
 
 module.exports = {
-  name: 'reset',
-  description: `Reset a player's stats!`,
-  usage: '<user>',
-  moderation: true,
-  execute: async (message: Message) => {
-    try {
-      const mentions = [...(message.mentions.members?.values() || [])];
+    name: 'reset',
+    description: `Reset a player's stats!`,
+    usage: '<user>',
+    manager: true,
+    execute: async (message: Message) => {
+        try {
+            const mentions = [...(message.mentions.members?.values() || [])];
 
-      if (!mentions.length || message.member?.permissions.has('MANAGE_ROLES'))
-        return;
+            // Abstract code.
 
-      resetPlayer(message.guild?.id || '', mentions[0].id);
+            const roles = [...(message.member?.roles.valueOf().entries() || [])].filter(
+                role => role[1].name === GAME_MANAGER
+            );
 
-      message.reply(`<@${mentions[0].id}>'s stats have been reset!`);
-    } catch (error) {
-      logError(error);
+            if (!roles.length) return;
+
+            if (!mentions.length) return;
+
+            resetPlayer(message.guild?.id || '', mentions[0].id);
+
+            message.reply(`<@${mentions[0].id}>'s stats have been reset!`);
+        } catch (error) {
+            logError(error);
+        }
     }
-  },
 };

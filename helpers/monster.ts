@@ -10,60 +10,56 @@ import { pickMonster } from './monster.factory';
 import { addBattle, isBattling } from './battle';
 
 const monsters = new Collection<{
-  id: string;
-  monster: Duelist;
-  timer: NodeJS.Timeout;
+    id: string;
+    monster: Duelist;
+    timer: NodeJS.Timeout;
 }>();
 
 const cleanUpDuel = (name: string) => {
-  const timer = monsters.getItem(name)?.timer;
+    const timer = monsters.getItem(name)?.timer;
 
-  if (timer) {
-    monsters.clearTimer(name, timer);
-  }
+    if (timer) {
+        monsters.clearTimer(name, timer);
+    }
 };
-
 
 export const spawnMonster = async (channel: TextChannel) => {
-  const timer = setInterval(async () => {
-    const monster = pickMonster(channel.name);
+    const timer = setInterval(async () => {
+        const monster = pickMonster(channel.name);
 
-    const embed = buildEmbed({
-      color: monster.color as ColorResolvable,
-      description: `A level ${monster.level} ${monster.name} appears!`,
-      title: monster.rank === 4 ? '**BOSS ATTACK**' : '**MONSTER ATTACK**',
-      thumb: `${BASE_URL}/${monster.id}.png`,
-    });
+        const embed = buildEmbed({
+            color: monster.color as ColorResolvable,
+            description: `A level ${monster.level} ${monster.name} appears!`,
+            title: monster.rank === 4 ? '**BOSS ATTACK**' : '**MONSTER ATTACK**',
+            thumb: `${BASE_URL}/${monster.id}.png`
+        });
 
-    clearMessage(
-      [...channel.messages.cache.values()],
-      monsters.getItem(channel.name)?.id || ''
-    );
+        clearMessage(
+            [...channel.messages.cache.values()],
+            monsters.getItem(channel.name)?.id || ''
+        );
 
-    const id = (await channel.send({ embeds: [embed] })).id;
+        const id = (await channel.send({ embeds: [embed] })).id;
 
-    monsters.addItem(channel.name, { monster, timer, id });
-  }, 90000);
+        monsters.addItem(channel.name, { monster, timer, id });
+    }, 90000);
 };
 
-export const engageMonster = async (
-  channel: TextChannel,
-  challengerId: string
-) => {
-  if (isBattling(challengerId)) {
-    return;
-  }
+export const engageMonster = async (channel: TextChannel, challengerId: string) => {
+    if (isBattling(challengerId)) {
+        return;
+    }
 
-  const monster = monsters.getItem(channel.name)?.monster;
-  const challenger = await ensurePlayer(channel.guild.id, challengerId);
+    const monster = monsters.getItem(channel.name)?.monster;
+    const challenger = await ensurePlayer(channel.guild.id, challengerId);
 
-  cleanUpDuel(channel.name);
-  addBattle(challengerId, challengerId);
+    cleanUpDuel(channel.name);
+    addBattle(challengerId, challengerId);
 
-  if (!monster || !challenger) return;
+    if (!monster || !challenger) return;
 
-  monster.luck = monster.luck || 1;
+    monster.luck = monster.luck || 1;
 
-  startRounds(challenger, monster, channel);
-  spawnMonster(channel);
+    startRounds(challenger, monster, channel);
+    spawnMonster(channel);
 };

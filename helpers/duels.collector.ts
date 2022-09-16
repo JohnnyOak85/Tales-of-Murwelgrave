@@ -14,22 +14,18 @@ export const cleanUpDuel = (name: string) => {
     }
 };
 
-
 export const isValid = (challenger: string, defender: string) => {
-    if (
-        duels.findItem(defender) ||
-        duels.getList().find((duel) => duel.challenger === defender)
-    ) {
-        return 'This fighter already has an open challenge.'
+    if (duels.findItem(defender) || duels.getList().find(duel => duel.challenger === defender)) {
+        return 'This fighter already has an open challenge.';
     } else if (
         duels.findItem(challenger) ||
-        duels.getList().find((duel) => duel.challenger === challenger)
+        duels.getList().find(duel => duel.challenger === challenger)
     ) {
-        return 'You already have an open challenge.'
+        return 'You already have an open challenge.';
     }
 
     return;
-}
+};
 
 export const addDuel = (channel: TextChannel, challenger: string, defender: string) => {
     duels.addItem(defender, {
@@ -37,8 +33,8 @@ export const addDuel = (channel: TextChannel, challenger: string, defender: stri
         timer: setTimeout(() => {
             duels.deleteItem(defender);
             channel.send(`<@${challenger}>'s challenge has expired!`);
-        }, 300000),
+        }, 300000)
     });
-}
+};
 
 export const getDuel = (duelId: string) => duels.getItem(duelId);
