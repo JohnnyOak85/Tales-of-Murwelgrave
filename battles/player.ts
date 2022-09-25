@@ -14,8 +14,8 @@ export const storePlayer = async (player: Player) => {
 const getPlayerBestiary = (bestiary: string | string[] | undefined) =>
     typeof bestiary === 'string' ? (JSON.parse(bestiary) as string[]) : bestiary || [];
 
-export const getPlayer = (user: string) => {
-    const player = players.getItem(user);
+export const getPlayer = (playerId: string, playerName: string) => {
+    const player = players.getItem(playerId);
 
     return {
         achievements: player?.achievements || [],
@@ -23,18 +23,19 @@ export const getPlayer = (user: string) => {
         bestiary: getPlayerBestiary(player?.bestiary),
         defense: Number(player?.defense) || getBaseDefense(),
         health: Number(player?.health) || getBaseHealth() + 50,
-        id: player?.id || '',
+        id: player?.id || playerId,
         level: Number(player?.level) || 1,
         losses: Number(player?.losses) || 0,
         luck: Number(player?.luck) || 1,
         messages: Number(player?.messages) || 0,
-        name: player?.name || DEFAULT_NAME,
+        name: player?.name || playerName || DEFAULT_NAME,
+        rank: player?.rank || 1,
         wins: Number(player?.wins) || 0
     };
 };
 
-export const getPlayerStats = (name: string) => {
-    const player = getPlayer(name);
+export const getPlayerStats = (name: string, playerName: string) => {
+    const player = getPlayer(name, playerName);
     const stats = [
         `Level: ${player.level}`,
         `Health: ${player.health}`,
@@ -43,10 +44,9 @@ export const getPlayerStats = (name: string) => {
         `Luck: ${player.luck}`,
         `Wins: ${player.wins}`,
         `Losses: ${player.losses}`,
-        `Achievements: ${player.achievements}`
     ]
    
-    if (player.achievements) {
+    if (player.achievements.length) {
         stats.push('Achievements:');
 
         player.achievements.forEach(achievement => stats.push(`- ${achievement}`));

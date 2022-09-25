@@ -10,7 +10,7 @@ module.exports = {
         try {
             if (message.channel.type !== ChannelType.GuildText || !message.member) return;
 
-            battle(message.channel, message.member.id);
+            battle(message.channel, message.author.id, message.author.username);
         } catch (error) {
             logError(error, 'command -> attack');
         }

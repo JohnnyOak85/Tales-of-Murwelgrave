@@ -1,4 +1,4 @@
-import { divide, getRandom } from '../tools/math';
+import { divide, getRandom, roundDown } from '../tools/math';
 
 /**
  * BASE PLAYER STATS
@@ -43,8 +43,8 @@ export const calcStats = (level: number) => {
     const divider = divide(statMedian, STAT_DIVIDER);
 
     return {
-        attack: statMax - divider,
-        defense: statMin + divider
+        attack: roundDown(statMax - divider),
+        defense: roundDown(statMin + divider)
     };
 };
 
@@ -62,7 +62,7 @@ export const calcHealth = (level: number) => {
     const maxHealth = getHealthControl(level, MAX_HEALTH_DIVISOR);
     const healthMedian = getRandom(maxHealth, minHealth);
 
-    return BASE_HEALTH + healthMedian;
+    return roundDown(BASE_HEALTH + healthMedian);
 };
 
 /**

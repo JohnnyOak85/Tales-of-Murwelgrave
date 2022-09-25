@@ -2,7 +2,6 @@ import { TextChannel } from 'discord.js';
 import { Monster, Player } from '../interfaces';
 import { getBool, getRandom, multiply } from '../tools/math';
 import { buildList } from '../tools/text';
-import { storePlayer } from './player';
 
 /**
  * Monsters
@@ -39,7 +38,7 @@ const splitExp = (experience: number) => {
 };
 
 const boostStat = (player: Player, stat: 'attack' | 'defense', boost: number) => {
-    if (player[stat] >= STAT_CAP) return '';
+    if (!boost || player[stat] >= STAT_CAP) return '';
 
     player[stat] += boost;
 
@@ -54,8 +53,8 @@ const HEALTH_CAP = 1000;
 const MAX_HEALTH_CONTROL = 60;
 const MIN_HEALTH_CONTROL = 45;
 
-const boostHealth = (player: Player) => {
-    if (player.health > HEALTH_CAP) return '';
+const boostHealth = (player: Player, currentLevel: number) => {
+    if (player.level > currentLevel || player.health > HEALTH_CAP) return '';
 
     const gain = getRandom(MAX_HEALTH_CONTROL, MIN_HEALTH_CONTROL);
     player.health += gain + multiply(player.level);
@@ -119,21 +118,15 @@ export const getBuffs = (
     const reply = [`**${player.name}** wins!`];
     const currentLevel = player.level;
     const experience = Math.max(1, Math.floor((monster.level * 4) / player.level));
-    const { attackBoost, defenseBoost } = splitExp( experience);
+    const { attackBoost, defenseBoost } = splitExp(experience);
     
     reply.push(checkMonster(player, monster));
     reply.push(levelUp(player));
     reply.push(rankUp(player));
-
-    if (player.level > currentLevel) {
-        reply.push(boostHealth(player));
-    }
-
+    reply.push(boostHealth(player, currentLevel));
     reply.push(boostStat(player, 'attack', attackBoost));
     reply.push(boostStat(player, 'defense', defenseBoost));
     reply.push(boostLuck(player, monster));
     
-    storePlayer(player);
-
     channel.send(buildList(reply));
 };

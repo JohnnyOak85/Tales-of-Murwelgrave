@@ -1,8 +1,8 @@
 import { TextChannel } from 'discord.js';
 import { Fighter, Monster, Player } from '../interfaces';
 import { getMonster, spawnMonster } from '../monsters/spawner';
-import { getPlayer } from './player';
-import { multiply, divide, getRandom } from '../tools/math';
+import { getPlayer, storePlayer } from './player';
+import { multiply, divide, getRandom, roundDown } from '../tools/math';
 import { getBuffs } from './result';
 
 const DAMAGE_CONTROL = 200;
@@ -22,13 +22,12 @@ const getBoost = (attribute: number) => {
     return attribute;
 };
 
-// warrior > knight > crusader
 const calcDamage = (damage: number, defense: number) => {
     const nerf = DAMAGE_CONTROL + defense;
     const control = DAMAGE_CONTROL / nerf;
     const finalDamage = damage * control;
 
-    return Math.floor(Math.max(0, finalDamage));
+    return roundDown(finalDamage);
 };
 
 const checkAttack = (attacker: Fighter, defender: Fighter, summary: string[]) => {
@@ -37,7 +36,7 @@ const checkAttack = (attacker: Fighter, defender: Fighter, summary: string[]) =>
     } else if (!defender.damage) {
         summary.push(`**${defender.name}** defended!`);
     } else {
-        defender.health = Math.max(0, defender.health - defender.damage);
+        defender.health = roundDown(defender.health - defender.damage);
 
         summary.push(
             `**${attacker.name}** attacks! *${defender.damage}* damage! **${defender.name}** has *${defender.health}* health.`
@@ -51,7 +50,7 @@ const checkDefense = (attacker: Fighter, defender: Fighter, summary: string[]) =
     const divider = divide(MAX_LUCK);
 
     if (defenderLuckDraw >= divider) {
-        attacker.health = Math.max(0, attacker.health - defender.attack);
+        attacker.health = roundDown(attacker.health - defender.attack);
 
         summary.push(
             `**${defender.name}** counters! *${defender.attack}* damage! **${attacker.name}** has *${attacker.health}* health.`
@@ -97,16 +96,21 @@ const startRounds = (player: Player, monster: Monster, channel: TextChannel) => 
     }
 
     if (winner.id === player.id) {
+        player.wins += 1;
         getBuffs(player, monster, channel);
+    } else {
+        player.losses += 1;
+        channel.send(`${player.name} lost!`);
     }
 
+    storePlayer(player);
     spawnMonster(channel);
 };
 
-export const battle = (channel: TextChannel, playerId: string) => {
+export const battle = (channel: TextChannel, playerId: string, playerName: string) => {
     try {
         const monster = getMonster();
-        const player = getPlayer(playerId);
+        const player = getPlayer(playerId, playerName);
 
         if (!monster || !player) return;
 
