@@ -3,14 +3,33 @@ import { Dictionary } from '../interfaces';
 
 const client = createClient();
 
-export const connect = async () => await client.connect();
+export const connect = () => client.connect();
 
-export const getValue = async (key: string) => await client.get(key);
+// export const getList = (key: string) => client.lRange(key, 0, -1);
+// export const getMap = (key: string) => client.hGetAll(key);
+export const getValue = (key: string) => client.get(key); // ! Unused
 
-export const getList = async (key: string) => await client.lRange(key, 0, -1);
-export const appendList = async (key: string, value: string) => await client.rPush(key, value);
-export const pushList = async (key: string, value: string[]) => await client.rPush(key, value);
+export const saveList = (key: string, value: string[]) => client.rPush(key, value);
+export const saveMap = (key: string, value: Dictionary<string | number>) => client.hSet(key, value);
+export const saveValue = (key: string, value: string) => client.set(key, value); // ! Unused
 
-export const getMap = async (key: string) => await client.hGetAll(key);
-export const appendMap = async (key: string, entry: Dictionary<string>) =>
-    await client.hSet(key, entry);
+// TODO TEMPORARY CODE
+
+const maps: Dictionary<any> = {
+    rank0: { '005_Mushroom_1_': 6 },
+    rank1: { '005_Mushroom_2_': 3 },
+    rank2: { '005_Mushroom_3_': 5 },
+    colors: {
+        1: '#57F287',
+        2: '#FEE75C',
+        3: '#ED4245',
+        4: '#F1C40F'
+    }
+};
+
+const lists: Dictionary<any[]> = {
+    variations: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+};
+
+export const getMap = (key: string) => maps[key];
+export const getList = (key: string) => lists[key];

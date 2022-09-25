@@ -1,6 +1,4 @@
-/database
-/dist
-/logs
 /node_modules
+/logs
 
-config.*
+.env

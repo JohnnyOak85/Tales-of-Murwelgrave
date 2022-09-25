@@ -1,5 +1,5 @@
 import { ChannelType, Message } from 'discord.js';
-import { engageMonster } from '../helpers/monster';
+import { battle } from '../battles/battle';
 import { logError } from '../tools/logger';
 
 module.exports = {
@@ -8,11 +8,11 @@ module.exports = {
     usage: ' ',
     execute: async (message: Message) => {
         try {
-            if (message.channel.type !== ChannelType.GuildText) return;
+            if (message.channel.type !== ChannelType.GuildText || !message.member) return;
 
-            engageMonster(message.channel, message.author.id);
+            battle(message.channel, message.member.id);
         } catch (error) {
-            logError(error);
+            logError(error, 'command -> attack');
         }
     }
 };

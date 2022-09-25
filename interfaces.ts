@@ -1,59 +1,47 @@
-import { Message } from 'discord.js';
+import { Message } from "discord.js";
 
-type MonsterVariation = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J';
-type MonsterRank = Dictionary<MonsterVariation[]>;
-export type GameArea = MonsterRank[];
+type GameArea = Dictionary<number>;
+export type GameAreas = Dictionary<GameArea[]>;
+export type PlayerRanks = Dictionary<string>;
 
-export interface RaffleTicket {
-    ticket: string;
-    timer: NodeJS.Timeout;
+type RankColors = { [x: number]: string };
+export interface GameConfig {
+    variations: string[];
+    colors: RankColors;
 }
 
 export interface Dictionary<T> {
     [x: string]: T;
 }
 
-export interface GameConfig {
-    list: string[] | Dictionary<string> | Dictionary<GameArea>;
+export interface Fighter {
+    attack: number;
+    boost?: number;
+    damage?: number;
+    defense: number;
+    health: number;
+    id: string;
+    level: number;
+    luck: number;
+    name: string;
+    rank: number;
+}
+
+export interface Player extends Fighter {
+    achievements: string[];
+    bestiary: string[];
+    losses: number;
+    messages: number;
+    wins: number;
+}
+
+export interface Monster extends Fighter {
+    color: string;
 }
 
 export interface Command {
     description: string;
-    execute: (message: Message, args?: string[]) => void;
-    manager: boolean;
+    execute: (message: Message) => void;
     name: string;
     usage: string;
 }
-
-const rank: MonsterRank = {
-    '004_Flower_': ['A', 'B', 'C', 'D', 'E'],
-    '034_Carrot_': ['A', 'B', 'C', 'D', 'E'],
-    '049_Nutsy_': ['A', 'B', 'C', 'D', 'E']
-};
-
-const forest: GameArea = [rank];
-
-const doc: GameConfig = {
-    list: { forest }
-};
-
-/**
- * AREA DOC EXAMPLE
- *
- * const test: AreaDoc = {
- *   list: {
- *      forest: [
- *          {
- *              '004_Flower_': ['A', 'B', 'C', 'D', 'E'],
- *              '034_Carrot_': ['A', 'B', 'C', 'D', 'E'],
- *              '049_Nutsy_': ['A', 'B', 'C', 'D', 'E']
- *          },
- *          {
- *              '005_Mushroom_1_': ['A', 'B', 'C', 'D', 'E', 'F'],
- *              '005_Mushroom_2_': ['A', 'B', 'C'],
- *              '054_DevilBerry_': ['A', 'B', 'C', 'D', 'E']
- *          }
- *      ]
- *   }
- * };
- */

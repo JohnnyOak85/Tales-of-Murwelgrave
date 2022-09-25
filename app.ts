@@ -1,22 +1,31 @@
 import { Client } from 'discord.js';
-import { TOKEN } from './config';
-import { checkIncomingMessage } from './helpers/message';
-import { start } from './tools/guild';
 import { logError } from './tools/logger';
-import { recordChanges } from './tools/member';
+import { readEnvironment } from './storage/environment';
+import { start } from './start';
+import { executeCommand } from './tools/commands';
 
-const bot = new Client({
+const client = new Client({
     intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent']
 });
 
-bot.login(TOKEN);
+readEnvironment();
 
-bot.on('ready', () => start([...bot.guilds.cache.values()]));
-bot.on('messageCreate', async message => checkIncomingMessage(message));
-bot.on('guildMemberUpdate', (a, member) => {
-    recordChanges(member);
+client.login(process.env.TOKEN);
+
+client.on('ready', async () =>{
+    const guild = await client.guilds.fetch(process.env.GUILD_ID || '');
+
+    if (!guild) {
+        logError('NO GUILD', 'on-ready')
+    }
+    
+    start(guild);
 });
 
-bot.on('error', error => {
-    logError(error);
+client.on('messageCreate', message => {
+    executeCommand(message);
+})
+
+client.on('error', error => {
+    logError(error, 'client');
 });

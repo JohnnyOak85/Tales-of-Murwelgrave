@@ -1,6 +1,6 @@
 import { Collection } from 'discord.js';
 
-export class CollectionFactory<T> {
+export class Collector<T> {
     private collection: Collection<string, T>;
 
     constructor() {
