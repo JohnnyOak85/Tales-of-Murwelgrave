@@ -1,6 +1,6 @@
 import { DiscordAPIError, TextChannel } from 'discord.js';
 import { Monster, Player } from '../interfaces';
-import { getList, getMap } from '../storage/cache';
+import { getList, getMap, getValue } from '../storage/cache';
 import { logError } from '../tools/logger';
 import { getBool, getRandom, multiply } from '../tools/math';
 import { buildList } from '../tools/text';
@@ -8,11 +8,41 @@ import { buildList } from '../tools/text';
 /**
  * Monsters
  */
-const checkMonster = (player: Player, monster: Monster) => {
+
+const getAreaName = () => {
+    const area = process.env.ACTIVE_AREA;
+    
+    if (!area) return 'Area';
+
+    const split = area.split('_');
+    const name = [];
+
+    for (let word of split) {
+        name.push(word[0].toUpperCase() + word.substring(1))
+    }
+
+    return name.join(' ');
+}
+
+const checkMonster = async (player: Player, monster: Monster) => {
+    const totalMonsters = await getValue('total_monsters');
+
     if (!player.bestiary.includes(monster.id)) {
         player.bestiary.push(monster.id);
     }
+    
+    if (!totalMonsters) return '';
 
+    if (player.bestiary.length === parseInt(totalMonsters)) {
+        player.achievements.push(`${getAreaName()} Conqueror`);
+        
+        return `You just defeated every monster! Congratulations!`;
+    }
+
+    return '';
+}
+
+const checkBoss = (player: Player, monster: Monster) => {
     if (monster.rank <= 4) return '';
     
     player.achievements.push(`${monster.name} Slayer`);
@@ -172,7 +202,8 @@ export const getBuffs = async (
     const experience = Math.max(1, Math.floor((monster.level * 4) / player.level));
     const { attackBoost, defenseBoost } = splitExp(experience);
     
-    reply.push(checkMonster(player, monster));
+    reply.push(checkBoss(player, monster));
+    reply.push(await checkMonster(player, monster));
     reply.push(levelUp(player));
     reply.push(await rankUp(player, channel));
     reply.push(boostHealth(player, currentLevel));
