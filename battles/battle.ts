@@ -1,5 +1,5 @@
 import { TextChannel } from 'discord.js';
-import { Fighter, Monster, Player } from '../interfaces';
+import { Fighter, Monster, Player, PlayerInfo } from '../interfaces';
 import { getMonster, spawnMonster } from '../monsters/spawner';
 import { getPlayer, storePlayer } from './player';
 import { multiply, divide, getRandom, roundDown } from '../tools/math';
@@ -107,13 +107,12 @@ const startRounds = (player: Player, monster: Monster, channel: TextChannel) => 
     spawnMonster(channel);
 };
 
-export const battle = (channel: TextChannel, playerId: string, playerName: string) => {
+export const battle = (channel: TextChannel, playerInfo: PlayerInfo) => {
     try {
         const monster = getMonster();
-        const player = getPlayer(playerId, playerName);
+        const player = getPlayer(playerInfo);
 
         if (!monster || !player) return;
-
 
         startRounds(player, monster, channel);
     } catch (error) {}
