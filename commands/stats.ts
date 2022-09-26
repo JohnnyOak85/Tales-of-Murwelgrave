@@ -8,7 +8,15 @@ module.exports = {
     usage: ' ',
     execute: async (message: Message) => {
         try {
-            message.channel.send(getPlayerStats(message.author.id, message.author.username))
+            if (!message.member) return;
+
+            const playerInfo = {
+                id: message.author.id,
+                name: message.author.username,
+                titles: message.member.roles.valueOf().map(role => role.id)
+            }
+
+            message.channel.send(getPlayerStats(playerInfo))
         } catch(error) {
             logError(error, 'command -> stats');
         }
