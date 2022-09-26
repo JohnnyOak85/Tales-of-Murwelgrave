@@ -1,5 +1,7 @@
-import { TextChannel } from 'discord.js';
+import { DiscordAPIError, TextChannel } from 'discord.js';
 import { Monster, Player } from '../interfaces';
+import { getList, getMap } from '../storage/cache';
+import { logError } from '../tools/logger';
 import { getBool, getRandom, multiply } from '../tools/math';
 import { buildList } from '../tools/text';
 
@@ -54,12 +56,12 @@ const MAX_HEALTH_CONTROL = 60;
 const MIN_HEALTH_CONTROL = 45;
 
 const boostHealth = (player: Player, currentLevel: number) => {
-    if (player.level > currentLevel || player.health > HEALTH_CAP) return '';
+    if (player.level <= currentLevel || player.health > HEALTH_CAP) return '';
 
     const gain = getRandom(MAX_HEALTH_CONTROL, MIN_HEALTH_CONTROL);
     player.health += gain + multiply(player.level);
 
-    return `**+${gain} health.**`
+    return `**+${gain} Health.**`
 }
 
 /**
@@ -77,7 +79,7 @@ const boostLuck = (player: Player, monster: Monster) => {
     
     player.luck += 1;
 
-    return `**+1 luck.**`;    
+    return `**+1 Luck.**`;    
 };
 
 /**
@@ -101,16 +103,66 @@ const levelUp = (player: Player) => {
 /**
  * Rank
  */
-
-const rankUp = (player: Player) => {
+const rankUp = async (player: Player, channel: TextChannel) => {
     if (player.level <= MAX_LEVEL) return '';
 
-    player.rank += 1;
+    const oldRank = await channel.guild.roles.fetch(player.rank);
+    
+    if (!oldRank?.id) return '';
 
-    return `Rank up! **${player.rank -1} -> ${player.rank}`;
+    const playerRanks = await getMap('ranks');
+    const newRank = await channel.guild.roles.fetch(playerRanks[player.rank]);
+
+    if (!newRank?.id) return '';
+
+    player.rank = newRank.id;
+
+    const member = await channel.guild.members.fetch(player.id);
+
+    try {
+        member.roles.remove(oldRank);
+        member.roles.add(newRank);
+    } catch(error) {
+        if ((error as DiscordAPIError).status === 403) {
+            logError(error, 'rankUp');
+            return '';
+        }
+
+        if ((error as DiscordAPIError).status === 404 && (error as DiscordAPIError).method === 'DELETE') {
+            logError(error, 'rankUp');
+            return '';
+        }
+
+        console.log(error);
+        return '';
+    }
+
+    return `Rank up! **${oldRank.name} -> ${newRank.name}**`;
 }
 
-export const getBuffs = (
+/**
+ * Fake Stats
+ */
+const MAX_ATTRIBUTES = 3;
+
+const boostRandomStat = async (reply: string[]) => {
+    const attributes = await getList('attributes');
+    let count = 0;
+
+    while (count <= MAX_ATTRIBUTES) {
+        const chance = getBool();
+
+        if (chance) {
+            const index = getRandom(attributes.length) - 1;
+            attributes.splice(index, 1);
+            reply.push(`**+1 ${attributes[index]}.**`);
+        }
+
+        count++;
+    }
+}
+
+export const getBuffs = async (
     player: Player,
     monster: Monster,
     channel: TextChannel
@@ -122,11 +174,13 @@ export const getBuffs = (
     
     reply.push(checkMonster(player, monster));
     reply.push(levelUp(player));
-    reply.push(rankUp(player));
+    reply.push(await rankUp(player, channel));
     reply.push(boostHealth(player, currentLevel));
     reply.push(boostStat(player, 'attack', attackBoost));
     reply.push(boostStat(player, 'defense', defenseBoost));
     reply.push(boostLuck(player, monster));
-    
+
+    await boostRandomStat(reply);
+
     channel.send(buildList(reply));
 };
