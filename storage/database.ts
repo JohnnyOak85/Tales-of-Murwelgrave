@@ -1,5 +1,5 @@
 import PouchDB from 'pouchdb';
-import { Dictionary, GameAreas, GameConfig, PlayerRanks } from '../interfaces';
+import { Dictionary, GameAreas, GameConfig } from '../interfaces';
 import { logError } from '../tools/logger';
 import { connect, saveList, saveMap } from './cache';
 
@@ -39,22 +39,14 @@ const storeAreas = async () => {
     }
 };
 
-const storeRanks = async () => {
-    try {
-        const ranks = await getDoc<PlayerRanks>('ranks');
-
-        saveMap('ranks', ranks);
-    } catch (error) {
-        logError(error, 'storeRanks');
-    }
-};
-
 const storeConfigs = async () => {
     try {
         const config = await getDoc<GameConfig>('config');
 
+        saveList('attributes', config.attributes);
+        saveList('colors', config.colors);
+        saveMap('ranks', config.ranks);
         saveList('variations', config.variations);
-        saveMap('colors', config.colors);
     } catch (error) {
         logError(error, 'storeConfigs');
     }
@@ -63,8 +55,7 @@ const storeConfigs = async () => {
 export const setupGame = async () => {
     try {
         await Promise.all([db.info(), connect()]);
-        await Promise.all([connect()]);
-        await Promise.all([storeAreas(), storeRanks(), storeConfigs()]);
+        await Promise.all([storeAreas(), storeConfigs()]);
     } catch (error) {
         logError(error, 'setupGame');
     }
