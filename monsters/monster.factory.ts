@@ -24,11 +24,11 @@ const getType = (monsters: string[]) => monsters[getRandom(monsters.length - 1, 
 const getMonsterInfo = async (rank: number) => {
     const monsters = await getMap(`rank${rank - 1}`);
     const variations = await getList('variations');
-    const colors = await getMap('colors');
+    const colors = await getList('colors');
     const type = getType(Object.keys(monsters));
 
     return {
-        color: colors[rank],
+        color: colors[rank -1],
         id: type + getVariation(variations, Number(monsters[type])),
         name: type.split('_')[1]
     };
