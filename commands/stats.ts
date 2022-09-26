@@ -16,7 +16,7 @@ module.exports = {
                 titles: message.member.roles.valueOf().map(role => role.id)
             }
 
-            message.channel.send(getPlayerStats(playerInfo))
+            getPlayerStats(playerInfo, message);
         } catch(error) {
             logError(error, 'command -> stats');
         }

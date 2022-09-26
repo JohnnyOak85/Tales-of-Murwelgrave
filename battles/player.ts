@@ -1,3 +1,4 @@
+import { EmbedBuilder, Message } from 'discord.js';
 import { Player, PlayerInfo } from '../interfaces';
 import { getMap } from '../storage/cache';
 import { Collector } from '../tools/collector';
@@ -44,24 +45,31 @@ export const getPlayer = (playerInfo: PlayerInfo) => {
     };
 };
 
-export const getPlayerStats = (playerInfo: PlayerInfo) => {
+export const getPlayerStats = async (playerInfo: PlayerInfo, message: Message) => {
     const player = getPlayer(playerInfo);
     const stats = [
-        `Level: ${player.level}`,
         `Health: ${player.health}`,
         `Attack: ${player.attack}`,
         `Defense: ${player.defense}`,
         `Luck: ${player.luck}`,
-        `Wins: ${player.wins}`,
-        `Losses: ${player.losses}`,
-    ]
-   
-    if (player.achievements.length) {
-        stats.push('Achievements:');
+    ];
 
-        player.achievements.forEach(achievement => stats.push(`- ${achievement}`));
-    }
+    const rank = await message.guild?.roles.fetch(player.rank);
+    const embed = new EmbedBuilder()
+        .setThumbnail(message.author.avatarURL() || '')
+        .setTitle(`${player.name} | Level ${player.level} ${rank?.name}`)
+        .setDescription(buildList(stats))
+        .setFields({
+            name: 'Records',
+            value: `Wins: ${player.wins} | Losses: ${player.losses}`
+        })
 
-    // TODO Build embed
-    return buildList(stats);
+        if (player.achievements.length) {
+            embed.addFields({
+                name: 'Achievements',
+                value: buildList(player.achievements)
+            })
+        }
+
+        message.channel.send({embeds: [embed]});
 }
