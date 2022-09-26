@@ -1,7 +1,7 @@
 import PouchDB from 'pouchdb';
 import { Dictionary, GameAreas, GameConfig } from '../interfaces';
 import { logError } from '../tools/logger';
-import { connect, saveList, saveMap } from './cache';
+import { connect, saveList, saveMap, saveValue } from './cache';
 
 const db = new PouchDB<Dictionary<any>>(`${process.env.DB_URL}/game`);
 
@@ -15,7 +15,7 @@ export const getDoc = async <T>(id: string) => {
             }
         }
 
-        return doc;
+        return doc as T;
     } catch (error) {
         throw error;
     }
@@ -30,10 +30,17 @@ const storeAreas = async () => {
 
         const areas = await getDoc<GameAreas>('areas');
         const area = areas[process.env.ACTIVE_AREA];
+        let totalMonsters = 0;
 
         for (const [index, rank] of area.entries()) {
             saveMap(`rank${index}`, rank);
+
+            for (const monster of Object.keys(rank)) {
+                totalMonsters += rank[monster];
+            }
         }
+
+        saveValue('total-monsters', totalMonsters.toString());
     } catch (error) {
         logError(error, 'storeAreas');
     }
