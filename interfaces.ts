@@ -2,12 +2,12 @@ import { Message } from "discord.js";
 
 type GameArea = Dictionary<number>;
 export type GameAreas = Dictionary<GameArea[]>;
-export type PlayerRanks = Dictionary<string>;
 
-type RankColors = { [x: number]: string };
 export interface GameConfig {
+    attributes: string[];
+    colors: string[];
+    ranks: Dictionary<string>;
     variations: string[];
-    colors: RankColors;
 }
 
 export interface Dictionary<T> {
@@ -24,7 +24,6 @@ export interface Fighter {
     level: number;
     luck: number;
     name: string;
-    rank: number;
 }
 
 export interface Player extends Fighter {
@@ -32,11 +31,13 @@ export interface Player extends Fighter {
     bestiary: string[];
     losses: number;
     messages: number;
+    rank: string;
     wins: number;
 }
 
 export interface Monster extends Fighter {
     color: string;
+    rank: number;
 }
 
 export interface Command {
@@ -44,4 +45,10 @@ export interface Command {
     execute: (message: Message) => void;
     name: string;
     usage: string;
+}
+
+export interface PlayerInfo {
+    id: string;
+    name: string;
+    titles: string[];
 }
