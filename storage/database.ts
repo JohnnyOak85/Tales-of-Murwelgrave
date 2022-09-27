@@ -3,7 +3,7 @@ import { Dictionary, GameAreas, GameConfig } from '../interfaces';
 import { logError } from '../tools/logger';
 import { connect, saveList, saveMap, saveValue } from './cache';
 
-const db = new PouchDB<Dictionary<any>>(`${process.env.DB_URL}/game`);
+let db: PouchDB.Database<Dictionary<any>>;
 
 export const getDoc = async <T>(id: string) => {
     try {
@@ -61,6 +61,8 @@ const storeConfigs = async () => {
 
 export const setupGame = async () => {
     try {
+        db = new PouchDB<Dictionary<any>>(`${process.env.DB_URL}/game`);
+
         await Promise.all([db.info(), connect()]);
         await Promise.all([storeAreas(), storeConfigs()]);
     } catch (error) {
