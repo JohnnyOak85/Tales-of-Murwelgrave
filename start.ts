@@ -37,7 +37,7 @@ export const start = async (guild: Guild | undefined) => {
 
         readEnvironment();
         setCommands()
-        // setupGame();
+        setupGame();
         spawnMonster(channel);
 
         logInfo('Game is ready.');
