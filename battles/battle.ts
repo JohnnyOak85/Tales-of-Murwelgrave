@@ -4,6 +4,7 @@ import { getMonster, spawnMonster } from '../monsters/spawner';
 import { getPlayer, storePlayer } from './player';
 import { multiply, divide, getRandom, roundDown } from '../tools/math';
 import { getBuffs } from './result';
+import { logError } from '../tools/logger';
 
 const DAMAGE_CONTROL = 200;
 const MISS_CHANCE = 21;
@@ -107,13 +108,15 @@ const startRounds = (player: Player, monster: Monster, channel: TextChannel) => 
     spawnMonster(channel);
 };
 
-export const battle = (channel: TextChannel, playerInfo: PlayerInfo) => {
+export const battle = async (channel: TextChannel, playerInfo: PlayerInfo) => {
     try {
         const monster = getMonster();
-        const player = getPlayer(playerInfo);
+        const player = await getPlayer(playerInfo);
 
         if (!monster || !player) return;
 
         startRounds(player, monster, channel);
-    } catch (error) {}
+    } catch (error) {
+        logError(error, 'battle');
+    }
 };

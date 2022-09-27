@@ -1,8 +1,6 @@
 import { ChannelType, Message } from 'discord.js';
 import { battle } from '../battles/battle';
-import { getMap } from '../storage/cache';
 import { logError } from '../tools/logger';
-import { getRandom } from '../tools/math';
 
 module.exports = {
     name: 'attack',
