@@ -4,7 +4,7 @@ import { MONSTER_RANK } from '../maps';
 import { Collector } from '../tools/collector';
 import { pickMonster } from './monster.factory';
 
-const COOL_DOWN = 30000; // 90000
+const COOL_DOWN = 30000;
 const TICKET = 'current';
 
 const monsters = new Collector<{
