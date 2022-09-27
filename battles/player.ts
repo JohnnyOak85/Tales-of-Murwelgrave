@@ -17,15 +17,15 @@ export const storePlayer = async (player: Player) => {
 const getPlayerBestiary = (bestiary: string | string[] | undefined) =>
     typeof bestiary === 'string' ? (JSON.parse(bestiary) as string[]) : bestiary || [];
 
-const getPlayerRank = (playerTitles: string[]) => {
-    const ranks = Object.keys(getMap('ranks'));
+const getPlayerRank = async (playerTitles: string[]) => {
+    const ranks = Object.keys(await getMap('ranks'));
     const playerRanks = playerTitles.filter(title => ranks.includes(title));
     const index = getRandom(playerRanks.length) - 1;
 
     return playerRanks[index];
 }
 
-export const getPlayer = (playerInfo: PlayerInfo) => {
+export const getPlayer = async (playerInfo: PlayerInfo) => {
     const player = players.getItem(playerInfo.id);
 
     return {
@@ -40,13 +40,13 @@ export const getPlayer = (playerInfo: PlayerInfo) => {
         luck: Number(player?.luck) || 1,
         messages: Number(player?.messages) || 0,
         name: player?.name || playerInfo.name || DEFAULT_NAME,
-        rank: player?.rank || getPlayerRank(playerInfo.titles),
+        rank: player?.rank || await getPlayerRank(playerInfo.titles),
         wins: Number(player?.wins) || 0
     };
 };
 
 export const getPlayerStats = async (playerInfo: PlayerInfo, message: Message) => {
-    const player = getPlayer(playerInfo);
+    const player = await getPlayer(playerInfo);
     const stats = [
         `Health: ${player.health}`,
         `Attack: ${player.attack}`,
