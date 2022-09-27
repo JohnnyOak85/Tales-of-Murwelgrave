@@ -21,13 +21,8 @@ const getChannel = async (guild: Guild) => {
     return channel;
 };
 
-export const start = async (guild: Guild | undefined) => {
+export const start = async (guild: Guild) => {
     try {
-        if (!guild) {
-            logError('NO GUILD FOUND', 'start');
-            return;
-        }
-
         const channel = await getChannel(guild);
 
         if (!channel) {
@@ -35,7 +30,6 @@ export const start = async (guild: Guild | undefined) => {
             return;
         }
 
-        readEnvironment();
         setCommands()
         setupGame();
         spawnMonster(channel);

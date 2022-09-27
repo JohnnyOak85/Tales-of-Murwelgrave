@@ -16,7 +16,8 @@ client.on('ready', async () =>{
     const guild = await client.guilds.fetch(process.env.GUILD_ID || '');
 
     if (!guild) {
-        logError('NO GUILD', 'on-ready')
+        logError('NO GUILD', 'on-ready');
+        return;
     }
     
     start(guild);
