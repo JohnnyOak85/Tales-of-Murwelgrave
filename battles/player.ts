@@ -1,6 +1,7 @@
 import { EmbedBuilder, Message } from 'discord.js';
 import { Player, PlayerInfo } from '../interfaces';
 import { getMap } from '../storage/cache';
+import { getDoc, storeDoc } from '../storage/database';
 import { Collector } from '../tools/collector';
 import { getRandom } from '../tools/math';
 import { buildList } from '../tools/text';
@@ -12,6 +13,7 @@ const players = new Collector<Player>();
 
 export const storePlayer = async (player: Player) => {
     players.addItem(player.id, player);
+    storeDoc(player);
 }
 
 const getPlayerBestiary = (bestiary: string | string[] | undefined) =>
@@ -26,9 +28,14 @@ const getPlayerRank = async (playerTitles: string[]) => {
 }
 
 export const getPlayer = async (playerInfo: PlayerInfo) => {
-    const player = players.getItem(playerInfo.id);
+    let player = players.getItem(playerInfo.id) || await getDoc(playerInfo.id);
+    let noRecord = false;
 
-    return {
+    if (!player) {
+        noRecord = true;
+    }
+
+    player = {
         achievements: player?.achievements || [],
         attack: Number(player?.attack) || getBaseAttack(),
         bestiary: getPlayerBestiary(player?.bestiary),
@@ -43,6 +50,12 @@ export const getPlayer = async (playerInfo: PlayerInfo) => {
         rank: player?.rank || await getPlayerRank(playerInfo.titles),
         wins: Number(player?.wins) || 0
     };
+
+    if (noRecord) {
+        storePlayer(player);
+    }
+
+    return player;
 };
 
 export const getPlayerStats = async (playerInfo: PlayerInfo, message: Message) => {

@@ -16,10 +16,34 @@ export const getDoc = async <T>(id: string) => {
         }
 
         return doc as T;
-    } catch (error) {
-        throw error;
+    } catch (error: any) {
+        if (error.status === 404) {
+            return;
+        }
+
+        logError(error, `getDoc -> ${id}`);
     }
 };
+
+export const storeDoc = async (doc: Dictionary<any>) => {
+    doc._id = doc._id || doc.id;
+
+    try {
+        await db.put(doc);
+    } catch(error: any) {
+        if (error.status === 409) {
+            const stored = await db.get(doc._id);
+
+            doc._rev = stored._rev;
+
+            await db.put(doc);
+            
+            return;
+        }
+
+        logError(error, `storeDoc -> ${doc._id || doc.id}`);
+    }
+}
 
 const storeAreas = async () => {
     try {
@@ -29,6 +53,12 @@ const storeAreas = async () => {
         }
 
         const areas = await getDoc<GameAreas>('areas');
+
+        if (!areas) {
+            logError('AREAS NOT SET', 'storeAreas');
+            return;
+        }
+
         const area = areas[process.env.ACTIVE_AREA];
         let totalMonsters = 0;
 
@@ -49,6 +79,11 @@ const storeAreas = async () => {
 const storeConfigs = async () => {
     try {
         const config = await getDoc<GameConfig>('config');
+
+        if (!config) {
+            logError('CONFIG NOT SET', 'storeConfigs');
+            return;
+        }
 
         saveList('attributes', config.attributes);
         saveList('colors', config.colors);
