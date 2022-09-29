@@ -3,7 +3,7 @@ import { Dictionary } from '../interfaces';
 
 const client = createClient();
 
-export const connect = () => client.connect();
+export const startCache = () => client.connect();
 
 export const getList = (key: string) => client.lRange(key, 0, -1);
 export const getMap = (key: string) => client.hGetAll(key);
