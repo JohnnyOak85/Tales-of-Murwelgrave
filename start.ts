@@ -3,7 +3,7 @@ import { setupGame } from './storage/database';
 import { spawnMonster, stopSpawner } from './monsters/spawner';
 import { ChannelType, Guild } from 'discord.js';
 import { setCommands } from './tools/commands';
-import { deleteValue, getValue, saveValue } from './storage/cache';
+import { connect, deleteValue, getValue, saveValue } from './storage/cache';
 
 const getChannel = async (guild: Guild) => {
     if (!process.env.CHANNEL_ID) {
@@ -23,7 +23,8 @@ const getChannel = async (guild: Guild) => {
 
 export const start = async () => {
     try {
-        setCommands()
+        setCommands();
+        connect();
 
         logInfo('Ready.');
     } catch (error) {
