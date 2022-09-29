@@ -9,8 +9,13 @@ module.exports = {
         try {
             if (!message.member?.permissions.has("Administrator") || message.channel.type !== ChannelType.GuildText) return;
 
-            const messages = await message.channel.messages.fetch();
-            message.channel.bulkDelete(messages);
+            let messages;
+
+            do {
+                messages = await message.channel.messages.fetch();
+                message.channel.bulkDelete(messages);
+            }
+            while (messages.size >= 2);
         } catch(error) {
             logError(error, 'command -> wipe');
         }
