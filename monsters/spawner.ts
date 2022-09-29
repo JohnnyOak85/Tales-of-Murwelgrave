@@ -55,3 +55,13 @@ export const spawnMonster = async (channel: TextChannel) => {
         monsters.addItem(TICKET, { message, monster, timer });
     }, COOL_DOWN);
 };
+
+export const stopSpawner = async () => {
+    const item = monsters.getItem(TICKET);
+
+    if (!item) return;
+
+    clearInterval(item.timer);
+
+    monsters.deleteItem(TICKET);
+}
