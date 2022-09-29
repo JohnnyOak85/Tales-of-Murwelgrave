@@ -12,15 +12,8 @@ readEnvironment();
 
 client.login(process.env.TOKEN);
 
-client.on('ready', async () =>{
-    const guild = await client.guilds.fetch(process.env.GUILD_ID || '');
-
-    if (!guild) {
-        logError('NO GUILD', 'on-ready');
-        return;
-    }
-    
-    start(guild);
+client.on('ready', async () =>{    
+    start();
 });
 
 client.on('messageCreate', message => {

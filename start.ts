@@ -1,9 +1,9 @@
-import { readEnvironment } from './storage/environment';
 import { logError, logInfo } from './tools/logger';
 import { setupGame } from './storage/database';
-import { spawnMonster } from './monsters/spawner';
+import { spawnMonster, stopSpawner } from './monsters/spawner';
 import { ChannelType, Guild } from 'discord.js';
 import { setCommands } from './tools/commands';
+import { deleteValue, getValue, saveValue } from './storage/cache';
 
 const getChannel = async (guild: Guild) => {
     if (!process.env.CHANNEL_ID) {
@@ -21,21 +21,38 @@ const getChannel = async (guild: Guild) => {
     return channel;
 };
 
-export const start = async (guild: Guild) => {
+export const start = async () => {
     try {
-        const channel = await getChannel(guild);
-
-        if (!channel) {
-            logError('NO CHANNEL FOUND', 'start');
-            return;
-        }
-
         setCommands()
-        setupGame();
-        spawnMonster(channel);
 
-        logInfo('Game is ready.');
+        logInfo('Ready.');
     } catch (error) {
         logError(error, 'start');
     }
 };
+
+export const startGame = async (guild: Guild) => {
+    const key = 'is-running'
+    try {
+        const isRunning = await getValue(key);
+
+        if (!isRunning) {
+            const channel = await getChannel(guild);
+
+            if (!channel) {
+                logError('NO CHANNEL FOUND', 'start');
+                return;
+            }
+
+            setupGame();
+            spawnMonster(channel);
+            
+            saveValue(key, 'true');
+        } else {
+            stopSpawner();
+            deleteValue(key);
+        }
+    } catch(error) {
+        logError(error, 'startGame');
+    }
+}
