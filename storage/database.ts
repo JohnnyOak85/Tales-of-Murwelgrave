@@ -1,11 +1,11 @@
 import PouchDB from 'pouchdb';
+import { DB_URL } from '../config'; 
 import { Dictionary, GameAreas, GameConfig } from '../interfaces';
 import { logError } from '../tools/logger';
 import { saveList, saveMap, saveValue } from './cache';
 
-let db: PouchDB.Database<Dictionary<any>>;
-
-export const startDatabase = () => db = new PouchDB<Dictionary<any>>(`${process.env.DB_URL}/game`);
+// let db: PouchDB.Database<Dictionary<any>>;
+const db = new PouchDB<Dictionary<any>>(`${DB_URL}/game`);
 
 export const getDoc = async <T>(id: string) => {
     try {

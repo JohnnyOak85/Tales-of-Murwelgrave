@@ -1,5 +1,5 @@
 import { logError, logInfo } from './tools/logger';
-import { setupGame, startDatabase } from './storage/database';
+import { setupGame } from './storage/database';
 import { spawnMonster, stopSpawner } from './monsters/spawner';
 import { ChannelType, Guild } from 'discord.js';
 import { setCommands } from './tools/commands';
@@ -25,7 +25,6 @@ export const start = async () => {
     try {
         setCommands();
         startCache();
-        startDatabase();
 
         console.log('Ready.');
         logInfo('Ready.');
