@@ -4,14 +4,10 @@ import { spawnMonster, stopSpawner } from './monsters/spawner';
 import { ChannelType, Guild } from 'discord.js';
 import { setCommands } from './tools/commands';
 import { startCache, deleteValue, getValue, saveValue } from './storage/cache';
+import { CHANNEL_ID } from './config';
 
 const getChannel = async (guild: Guild) => {
-    if (!process.env.CHANNEL_ID) {
-        logError('GAME CHANNEL ID NOT SET', 'getChannel');
-        return;
-    }
-
-    const channel = await guild.channels.fetch(process.env.CHANNEL_ID);
+    const channel = await guild.channels.fetch(CHANNEL_ID);
 
     if (!channel?.isTextBased() || channel.type !== ChannelType.GuildText) {
         logError('WRONG CHANNEL TYPE', 'getChannel');

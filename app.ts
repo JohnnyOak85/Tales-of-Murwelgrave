@@ -3,6 +3,7 @@ import { logError } from './tools/logger';
 import { readEnvironment } from './storage/environment';
 import { start } from './start';
 import { executeCommand } from './tools/commands';
+import { PLAYER_ROLE_ID, TOKEN } from './config';
 
 const client = new Client({
     intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent']
@@ -10,7 +11,7 @@ const client = new Client({
 
 readEnvironment();
 
-client.login(process.env.TOKEN);
+client.login(TOKEN);
 
 client.on('ready', async () =>{    
     start();
@@ -21,7 +22,7 @@ client.on('messageCreate', message => {
 })
 
 client.on('guildMemberAdd', async member => {
-    const role = await member.guild.roles.fetch(process.env.PLAYER_ROLE_ID || '');
+    const role = await member.guild.roles.fetch(PLAYER_ROLE_ID || '');
 
     if (!role) {
         logError('NO ROLE', 'on-guildMemberAdd');

@@ -1,5 +1,5 @@
 import PouchDB from 'pouchdb';
-import { DB_URL } from '../config'; 
+import { ACTIVE_AREA, DB_URL } from '../config'; 
 import { Dictionary, GameAreas, GameConfig } from '../interfaces';
 import { logError } from '../tools/logger';
 import { saveList, saveMap, saveValue } from './cache';
@@ -49,11 +49,6 @@ export const storeDoc = async (doc: Dictionary<any>) => {
 
 const storeAreas = async () => {
     try {
-        if (!process.env.ACTIVE_AREA) {
-            logError('NO ACTIVE AREA', 'storeAreas');
-            return;
-        }
-
         const areas = await getDoc<GameAreas>('areas');
 
         if (!areas) {
@@ -61,7 +56,7 @@ const storeAreas = async () => {
             return;
         }
 
-        const area = areas[process.env.ACTIVE_AREA];
+        const area = areas[ACTIVE_AREA];
         let totalMonsters = 0;
 
         for (const [index, rank] of area.entries()) {

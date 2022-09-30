@@ -1,4 +1,5 @@
 import { DiscordAPIError, TextChannel } from 'discord.js';
+import { ACTIVE_AREA } from '../config';
 import { Monster, Player } from '../interfaces';
 import { getList, getMap, getValue } from '../storage/cache';
 import { logError } from '../tools/logger';
@@ -9,12 +10,8 @@ import { buildList } from '../tools/text';
  * Monsters
  */
 
-const getAreaName = () => {
-    const area = process.env.ACTIVE_AREA;
-    
-    if (!area) return 'Area';
-
-    const split = area.split('_');
+const getAreaName = () => {    
+    const split = ACTIVE_AREA.split('_');
     const name = [];
 
     for (let word of split) {

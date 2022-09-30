@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import { readdirSync } from 'fs';
+import { CHANNEL_ID } from "../config";
 import { Command } from "../interfaces";
 import { Collector } from "./collector";
 import { logError } from "./logger";
@@ -23,7 +24,7 @@ export const setCommands = () => {
 
 export const executeCommand = (message: Message) => {
     try {
-        if (message.channelId !== process.env.CHANNEL_ID) return;
+        if (message.channelId !== CHANNEL_ID) return;
 
         const prefix = message.content.trim().split(/ +/g)[0].toLowerCase();
         const commandNames = getCommandNames();

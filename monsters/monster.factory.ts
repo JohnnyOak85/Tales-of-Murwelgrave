@@ -3,6 +3,7 @@ import { MONSTER_CHANCE, MONSTER_RANK } from '../maps';
 import { getList, getMap } from '../storage/cache';
 import { getRandom } from '../tools/math';
 import { calcHealth, calcLevel, calcLuck, calcStats } from '../battles/stats';
+import { GAME_TYPE } from '../config';
 
 const getRank = (): number => {
     const chance = getRandom();
@@ -14,7 +15,7 @@ const getRank = (): number => {
     } else if (chance < MONSTER_CHANCE.high) {
         return MONSTER_RANK.high;
     } else {
-        return process.env.GAME_TYPE === 'short' ? getRank() : MONSTER_RANK.boss;
+        return GAME_TYPE === 'short' ? getRank() : MONSTER_RANK.boss;
     }
 };
 
