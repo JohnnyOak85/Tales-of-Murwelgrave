@@ -2,7 +2,7 @@ import { config } from 'dotenv';
 import { logError } from '../tools/logger';
 
 export const readEnvironment = () => {
-    const env = config();
+    const env = config(); // Give full path
 
     if (env.error) {
         logError(env.error, 'readEnvironment');
