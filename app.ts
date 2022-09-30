@@ -1,6 +1,5 @@
 import { Client } from 'discord.js';
 import { logError } from './tools/logger';
-import { readEnvironment } from './storage/environment';
 import { start } from './start';
 import { executeCommand } from './tools/commands';
 import { PLAYER_ROLE_ID, TOKEN } from './config';
@@ -8,8 +7,6 @@ import { PLAYER_ROLE_ID, TOKEN } from './config';
 const client = new Client({
     intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent']
 });
-
-readEnvironment();
 
 client.login(TOKEN);
 
