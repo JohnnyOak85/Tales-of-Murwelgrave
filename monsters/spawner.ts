@@ -30,6 +30,8 @@ export const getMonster = () => {
     if (!item) return;
 
     clearInterval(item.timer);
+    
+    monsters.deleteItem(TICKET);
 
     return item.monster;
 };
