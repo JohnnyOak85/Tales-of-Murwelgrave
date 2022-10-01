@@ -1,6 +1,6 @@
 import { DiscordAPIError, TextChannel } from 'discord.js';
 import { ACTIVE_AREA } from '../config';
-import { Monster, Player } from '../interfaces';
+import { Dictionary, Monster, Player } from '../interfaces';
 import { getList, getMap, getValue } from '../storage/cache';
 import { logError } from '../tools/logger';
 import { getBool, getRandom, multiply } from '../tools/math';
@@ -172,8 +172,9 @@ const rankUp = async (player: Player, channel: TextChannel) => {
  */
 const MAX_ATTRIBUTES = 3;
 
-const boostRandomStat = async (reply: string[]) => {
+const boostRandomStat = async (player: Player, reply: string[]) => {
     const attributes = await getList('attributes');
+    const attributesGained: Dictionary<number> = {};
     let count = 0;
 
     while (count <= MAX_ATTRIBUTES) {
@@ -181,8 +182,12 @@ const boostRandomStat = async (reply: string[]) => {
 
         if (chance) {
             const index = getRandom(attributes.length) - 1;
-            attributes.splice(index, 1);
-            reply.push(`**+1 ${attributes[index]}.**`);
+            attributesGained[attributes[index]] = (attributesGained[attributes[index]] || 0) + 1;
+            player.attributes[attributes[index]] = (player.attributes[attributes[index]] || 0) + 1;
+        }
+
+        for (const stat in attributesGained) {
+            reply.push(`**+${attributesGained[stat]} ${stat}.**`)
         }
 
         count++;
@@ -208,7 +213,7 @@ export const getBuffs = async (
     reply.push(boostStat(player, 'defense', defenseBoost));
     reply.push(boostLuck(player, monster));
 
-    await boostRandomStat(reply);
+    await boostRandomStat(player, reply);
 
     channel.send(buildList(reply));
 };

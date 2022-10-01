@@ -28,6 +28,7 @@ export interface Fighter {
 
 export interface Player extends Fighter {
     achievements: string[];
+    attributes: Dictionary<number>;
     bestiary: string[];
     losses: number;
     messages: number;
