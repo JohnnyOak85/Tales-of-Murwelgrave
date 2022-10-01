@@ -175,7 +175,7 @@ const MAX_ATTRIBUTES = 3;
 const boostRandomStat = async (player: Player, reply: string[]) => {
     const attributes = await getList('attributes');
     const attributesGained: Dictionary<number> = {};
-    let count = 0;
+    let count = 1;
 
     while (count <= MAX_ATTRIBUTES) {
         const chance = getBool();
@@ -186,11 +186,11 @@ const boostRandomStat = async (player: Player, reply: string[]) => {
             player.attributes[attributes[index]] = (player.attributes[attributes[index]] || 0) + 1;
         }
 
-        for (const stat in attributesGained) {
-            reply.push(`**+${attributesGained[stat]} ${stat}.**`)
-        }
-
         count++;
+    }
+
+    for (const stat in attributesGained) {
+        reply.push(`**+${attributesGained[stat]} ${stat}.**`)
     }
 }
 
