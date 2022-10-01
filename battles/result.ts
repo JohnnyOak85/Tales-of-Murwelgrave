@@ -101,8 +101,9 @@ const boostLuck = (player: Player, monster: Monster) => {
 
     const playerStats = player.level + player.attack + player.defense + player.health + player.luck;
     const monsterStats = monster.level + monster.attack + monster.defense + monster.health + monster.luck;
+    const chance = getBool();
 
-    if (playerStats <= monsterStats) return '';
+    if (playerStats <= monsterStats && !chance) return '';
     
     player.luck += 1;
 
