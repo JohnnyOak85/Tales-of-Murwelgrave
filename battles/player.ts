@@ -37,7 +37,7 @@ export const getPlayer = async (playerInfo: PlayerInfo) => {
 
     player = {
         achievements: player?.achievements || [],
-        attributes: {},
+        attributes: player?.attributes || {},
         attack: Number(player?.attack) || getBaseAttack(),
         bestiary: getPlayerBestiary(player?.bestiary),
         defense: Number(player?.defense) || getBaseDefense(),
