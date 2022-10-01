@@ -40,9 +40,13 @@ const checkMonster = async (player: Player, monster: Monster) => {
 }
 
 const checkBoss = (player: Player, monster: Monster) => {
-    if (monster.rank <= 4) return '';
+    if (monster.rank < 4) return '';
     
-    player.achievements.push(`${monster.name} Slayer`);
+    const achievement = `${monster.name} Slayer`;
+
+    if (!player.achievements.includes(achievement)) {
+        player.achievements.push(`${monster.name} Slayer`);
+    }
 
     return `You just defeated the **${monster.name}**! Congratulations!`;
 }
