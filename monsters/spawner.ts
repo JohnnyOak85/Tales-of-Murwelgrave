@@ -89,7 +89,7 @@ export const spawnMonster = async (channel: TextChannel) => {
     clearInterval(timer);
 
     const monster = await pickMonster();
-    const embed = buildEmbed(activeMonster.monster);
+    const embed = buildEmbed(monster);
     
     if (activeMonster?.message) activeMonster.message.delete();
 
