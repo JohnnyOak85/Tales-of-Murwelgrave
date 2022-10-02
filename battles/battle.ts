@@ -36,7 +36,7 @@ const calcDamage = (damage: number, defense: number) => {
 
 const checkAttack = (attacker: Fighter, defender: Fighter, summary: string[]) => {
     if (!attacker.boost) {
-        summary.push(`**${attacker.name}** missed!`);
+        summary.push(`**${attacker.name}** missed...`);
     } else if (!defender.damage) {
         summary.push(`**${defender.name}** defended!`);
     } else {
@@ -44,7 +44,7 @@ const checkAttack = (attacker: Fighter, defender: Fighter, summary: string[]) =>
         defender.health = roundDown(defender.health - defender.damage);
 
         summary.push(
-            `**${attacker.name}** attacks! *${defender.damage}*! **${defender.name}** \`${defender.health}/${fighter?.health}\` HP.`
+            `**${attacker.name}** attacks! *${defender.damage}* :boom: **${defender.name}** \`${defender.health}/${fighter?.health}\` HP`
         );
     }
 };
@@ -59,7 +59,7 @@ const checkDefense = (attacker: Fighter, defender: Fighter, summary: string[]) =
         attacker.health = roundDown(attacker.health - defender.attack);
 
         summary.push(
-            `**${defender.name}** counters! *${defender.attack}*! **${attacker.name}** \`${attacker.health}/${fighter?.health}\` HP.`
+            `**${defender.name}** counters! *${defender.attack}* :boom: **${attacker.name}** \`${attacker.health}/${fighter?.health}\` HP`
         );
     } else if (attacker.boost && attackerLuckDraw >= MAX_LUCK) {
         summary.push(`**${attacker.name}** follows through!`);
@@ -106,7 +106,7 @@ const startRounds = (player: Player, monster: Monster, channel: TextChannel) => 
         getBuffs(player, monster, channel);
     } else {
         player.losses += 1;
-        channel.send(`${player.name} lost!`);
+        channel.send(`${player.name} lost...`);
     }
 
     storePlayer(player);
