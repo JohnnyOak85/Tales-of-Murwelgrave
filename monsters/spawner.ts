@@ -89,7 +89,7 @@ const ticker = () => {
 
         if (!item) return;
 
-        item.timer
+        console.log(item.timer)
     }, 5000)
 }
 
