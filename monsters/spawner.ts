@@ -8,12 +8,14 @@ const COOL_DOWN = 30000;
 
 let timer: NodeJS.Timeout;
 let activeMonster: {
-    message: Message;
-    monster: Monster;
+    message?: Message;
+    monster?: Monster;
 };
 
 export const getMonster = () => {
-   if (timer) clearInterval(timer);
+    if (timer) clearInterval(timer);
+
+    delete activeMonster.message;
 
     return activeMonster?.monster;
 }
@@ -37,7 +39,7 @@ export const spawnMonster = async (channel: TextChannel) => {
     if (activeMonster?.message) activeMonster.message.delete();
 
     activeMonster = {
-        monster: monster,
+        monster,
         message: await channel.send(embed)
     }
     
