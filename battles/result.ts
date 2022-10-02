@@ -99,15 +99,16 @@ const boostHealth = (player: Player, currentLevel: number) => {
  * LUCK
  */
 const LUCK_CAP = 100;
+const LUCK_CHANCE = 20;
 
 const boostLuck = (player: Player, monster: Monster) => {
     if (player.luck >= LUCK_CAP) return '';
 
     const playerStats = player.level + player.attack + player.defense + player.health + player.luck;
     const monsterStats = monster.level + monster.attack + monster.defense + monster.health + monster.luck;
-    const chance = getBool();
+    const chance = getRandom();
 
-    if (playerStats >= monsterStats && !chance) return '';
+    if (playerStats >= monsterStats && chance > LUCK_CHANCE) return '';
     
     player.luck += 1;
 
