@@ -75,7 +75,7 @@ const boostStat = (player: Player, stat: 'attack' | 'defense', boost: number) =>
 
     player[stat] += boost;
 
-    return `**+${boost} ${stat}.**`;
+    return `**+${boost} ${stat[0].toUpperCase()}${stat.substring(1)}.**`;
 };
 
 /**
