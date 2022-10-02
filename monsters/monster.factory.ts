@@ -1,5 +1,5 @@
 import { Monster } from '../interfaces';
-import { MONSTER_CHANCE, MONSTER_RANK } from '../maps';
+import { MONSTER_CHANCE, MONSTER_CLASS, MONSTER_RANK } from '../maps';
 import { getList, getMap } from '../storage/cache';
 import { getRandom } from '../tools/math';
 import { calcHealth, calcLevel, calcLuck, calcStats } from '../battles/stats';
@@ -25,11 +25,16 @@ const getType = (monsters: string[]) => monsters[getRandom(monsters.length - 1, 
 const getMonsterInfo = async (rank: number) => {
     const monsters = await getMap(`rank${rank - 1}`);
     const variations = await getList('variations');
+    const descriptions = await getMap('descriptions');
     const colors = await getList('colors');
     const type = getType(Object.keys(monsters));
+    const id = type + getVariation(variations, Number(monsters[type]));
+    const classIndex = parseInt(type.split('_')[2]);
 
     return {
+        className: MONSTER_CLASS[classIndex],
         color: colors[rank -1],
+        description: descriptions[id],
         id: type + getVariation(variations, Number(monsters[type])),
         name: type.split('_')[1]
     };
@@ -50,8 +55,8 @@ const getMonsterStats = (rank: number) => {
 
 export const pickMonster = async (): Promise<Monster> => {
     const rank = getRank();
-    const { color, id, name } = await getMonsterInfo(rank);
+    const { className, color, description, id, name } = await getMonsterInfo(rank);
     const { attack, defense, health, level, luck } = getMonsterStats(rank);
 
-    return { attack, color, defense, health, id, level, luck, name, rank };
+    return { attack, className, color, defense, description, health, id, level, luck, name, rank };
 };

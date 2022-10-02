@@ -84,6 +84,7 @@ const storeConfigs = async () => {
 
         saveList('attributes', config.attributes);
         saveList('colors', config.colors);
+        saveMap('descriptions', config.descriptions);
         saveMap('ranks', config.ranks);
         saveList('variations', config.variations);
     } catch (error) {

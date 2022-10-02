@@ -41,7 +41,7 @@ export const getMonster = () => {
 const buildEmbed = (monster: Monster) => {
     const embed = new EmbedBuilder()
         .setColor(monster.color as ColorResolvable)
-        .setDescription(`A level ${monster.level} ${monster.name} appears!`)
+        .setDescription(`A level ${monster.level} ${monster.description} ${monster.name}${monster.className ? ` ${monster.className}` : ''} appears!`)
         .setTitle(monster.rank === MONSTER_RANK.boss ? '**BOSS ATTACK**' : '**MONSTER ATTACK**')
         .setThumbnail(`${MONSTER_DB}/${monster.id}.png`);
 

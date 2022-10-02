@@ -1,5 +1,6 @@
 import { EmbedBuilder, Message } from 'discord.js';
 import { Player, PlayerInfo } from '../interfaces';
+import { MONSTER_CLASS } from '../maps';
 import { getMap, getValue } from '../storage/cache';
 import { getDoc, storeDoc } from '../storage/database';
 import { Collector } from '../tools/collector';
@@ -92,12 +93,24 @@ export const getPlayerBestiary = async (playerInfo: PlayerInfo, message: Message
     const player = await getPlayer(playerInfo);
     const bestiary = player.bestiary.length ? player.bestiary.sort((a, b) => a.localeCompare(b)) : [];
     const totalMonsters = await getValue('total-monsters');
+    const monsterDescriptions = await getMap('descriptions');
     const monsters: string[] = [];
 
     for (const monster of bestiary) {
         const arr = monster.split('_');
+        const name = arr[1];
+        const index = parseInt(arr[2])
+        let description = '';
+        let className = '';
 
-        monsters.push(`${arr[1]} ${arr[2]}${arr[3] && ` ${arr[3]}`}`);
+        if (index) {
+            className = MONSTER_CLASS[index];
+            description = arr[3] ? monsterDescriptions[monster] : '';
+        } else {
+            description = arr[2] ? monsterDescriptions[monster] : '';
+        }
+
+        monsters.push(`${description} ${name}${className}`);
     }
 
     const embed = new EmbedBuilder()
