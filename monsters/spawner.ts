@@ -20,11 +20,14 @@ const cleanPrevious = async () => {
         const item = monsters.getItem(TICKET);
         
         if (!item) return;
-        
+
+        console.log('CLEARING INTERVAL')
         clearInterval(item.timer);
 
+        console.log('DELETING MESSAGE')
         await item.message.delete();
 
+        console.log('DELETING ITEM')
         monsters.deleteItem(TICKET);
     } catch(error) {
         logError(error, 'cleanPrevious');
@@ -58,10 +61,13 @@ export const spawnMonster = async (channel: TextChannel) => {
         const monster = await pickMonster();
         const embed = buildEmbed(monster);
 
+        console.log('CLEANING PREVIOUS MONSTER')
         await cleanPrevious();
 
+        console.log('SENDING NEW MESSAGE')
         const message = await channel.send(embed);
 
+        console.log('ADDING ITEM')
         monsters.addItem(TICKET, { message, monster, timer });
     }, COOL_DOWN);
 };
