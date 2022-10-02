@@ -2,7 +2,7 @@ import { TextChannel } from 'discord.js';
 import { Fighter, Monster, Player, PlayerInfo } from '../interfaces';
 import { getMonster, spawnMonster } from '../monsters/spawner';
 import { getPlayer, storePlayer } from './player';
-import { multiply, divide, getRandom, roundDown } from '../tools/math';
+import { multiply, getRandom, roundDown, getBool } from '../tools/math';
 import { getBuffs } from './result';
 import { logError } from '../tools/logger';
 
@@ -48,15 +48,15 @@ const checkAttack = (attacker: Fighter, defender: Fighter, summary: string[]) =>
 const checkDefense = (attacker: Fighter, defender: Fighter, summary: string[]) => {
     const attackerLuckDraw = getRandom(MAX_LUCK, attacker.luck);
     const defenderLuckDraw = getRandom(MAX_LUCK, defender.luck);
-    const divider = divide(MAX_LUCK);
+    const chance = getBool();
 
-    if (defenderLuckDraw >= divider) {
+    if (defenderLuckDraw >= MAX_LUCK && chance) {
         attacker.health = roundDown(attacker.health - defender.attack);
 
         summary.push(
             `**${defender.name}** counters! *${defender.attack}* damage! **${attacker.name}** has *${attacker.health}* health.`
         );
-    } else if (attacker.boost && attackerLuckDraw >= divider) {
+    } else if (attacker.boost && attackerLuckDraw >= MAX_LUCK) {
         summary.push(`**${attacker.name}** follows through!`);
 
         return { boutWinner: attacker, boutLoser: defender, summary: summary.join('\n') };
