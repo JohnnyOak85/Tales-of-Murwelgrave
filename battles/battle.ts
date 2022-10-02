@@ -5,11 +5,14 @@ import { getPlayer, storePlayer } from './player';
 import { multiply, getRandom, roundDown, getBool } from '../tools/math';
 import { getBuffs } from './result';
 import { logError } from '../tools/logger';
+import { Collector } from '../tools/collector';
 
 const DAMAGE_CONTROL = 200;
 const MISS_CHANCE = 21;
 const DOUBLE_CHANCE = 80;
 const MAX_LUCK = 100;
+
+const fighters = new Collector<Fighter>();
 
 const getBoost = (attribute: number) => {
     const boost = getRandom();
@@ -37,10 +40,11 @@ const checkAttack = (attacker: Fighter, defender: Fighter, summary: string[]) =>
     } else if (!defender.damage) {
         summary.push(`**${defender.name}** defended!`);
     } else {
+        const fighter = fighters.getItem(defender.id);
         defender.health = roundDown(defender.health - defender.damage);
 
         summary.push(
-            `**${attacker.name}** attacks! *${defender.damage}* damage! **${defender.name}** has *${defender.health}* health.`
+            `**${attacker.name}** attacks! *${defender.damage}*! **${defender.name}** \`${defender.health}/${fighter?.health}\` HP.`
         );
     }
 };
@@ -51,10 +55,11 @@ const checkDefense = (attacker: Fighter, defender: Fighter, summary: string[]) =
     const chance = getBool();
 
     if (defenderLuckDraw >= MAX_LUCK && chance) {
+        const fighter = fighters.getItem(attacker.id);
         attacker.health = roundDown(attacker.health - defender.attack);
 
         summary.push(
-            `**${defender.name}** counters! *${defender.attack}* damage! **${attacker.name}** has *${attacker.health}* health.`
+            `**${defender.name}** counters! *${defender.attack}*! **${attacker.name}** \`${attacker.health}/${fighter?.health}\` HP.`
         );
     } else if (attacker.boost && attackerLuckDraw >= MAX_LUCK) {
         summary.push(`**${attacker.name}** follows through!`);
@@ -115,6 +120,9 @@ export const battle = async (channel: TextChannel, playerInfo: PlayerInfo) => {
 
         if (!monster || !player) return;
 
+        fighters.addItem(monster.id, monster);
+        fighters.addItem(player.id, player);
+        
         startRounds(player, monster, channel);
     } catch (error) {
         logError(error, 'battle');
