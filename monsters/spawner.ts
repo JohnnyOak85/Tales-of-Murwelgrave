@@ -14,7 +14,7 @@ let timer: NodeJS.Timeout;
 let activeMonster: {
     message: Message;
     monster: Monster;
-}
+};
 
 const monsters = new Collector<{
     message: Message;
@@ -88,10 +88,15 @@ const buildEmbed = (monster: Monster) => {
 export const spawnMonster = async (channel: TextChannel) => {
     clearInterval(timer);
 
-    activeMonster.monster = await pickMonster();
+    const monster = await pickMonster();
     const embed = buildEmbed(activeMonster.monster);
-    activeMonster.message.delete();
-    activeMonster.message = await channel.send(embed);
+    
+    if (activeMonster?.message) activeMonster.message.delete();
+
+    activeMonster = {
+        monster: monster,
+        message: await channel.send(embed)
+    }
     
     timer = setInterval(() => spawnMonster(channel), COOL_DOWN);
 }
