@@ -1,11 +1,29 @@
 import PouchDB from 'pouchdb';
 import { ACTIVE_AREA, DB_URL } from '../config'; 
-import { Dictionary, GameAreas, GameConfig } from '../interfaces';
+import { Dictionary, GameAreas, GameConfig, Player } from '../interfaces';
 import { logError } from '../tools/logger';
 import { saveList, saveMap, saveValue } from './cache';
 
 // let db: PouchDB.Database<Dictionary<any>>;
 const db = new PouchDB<Dictionary<any>>(`${DB_URL}/game`);
+
+export const getPlayerDocs = async () => {
+    try {
+        const res = await db.allDocs<Player>({ include_docs: true });
+
+        return res.rows.map(row => row.doc).filter(doc => doc).filter(doc => !['areas', 'config'].includes(doc?._id || '')).map(doc => {
+            for (const key in doc) {
+                if (key.startsWith('_')) {
+                    delete doc[key];
+                }
+            }
+
+            return doc;
+        }) as Player[];
+    } catch(error) {
+        logError(error, 'getPlayerDocs');
+    }
+}
 
 export const getDoc = async <T>(id: string) => {
     try {

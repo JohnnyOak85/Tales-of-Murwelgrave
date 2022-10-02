@@ -2,7 +2,7 @@ import { EmbedBuilder, Message } from 'discord.js';
 import { Player, PlayerInfo } from '../interfaces';
 import { MONSTER_CLASS } from '../maps';
 import { getMap, getValue } from '../storage/cache';
-import { getDoc, storeDoc } from '../storage/database';
+import { getDoc, getPlayerDocs, storeDoc } from '../storage/database';
 import { Collector } from '../tools/collector';
 import { getRandom } from '../tools/math';
 import { buildList } from '../tools/text';
@@ -123,4 +123,28 @@ export const getPlayerBestiary = async (playerInfo: PlayerInfo, message: Message
     }
     
     message.channel.send({embeds: [embed]}); 
+}
+
+export const getScoreBoard = async (message: Message) => {
+    const players = await getPlayerDocs();
+    const scoreBoard: string[] = [];
+
+    if (!players?.length) return;
+    
+    const sortedPlayers = players
+        .sort((a, b) => (a.wins - a.losses) - (b.wins - b.losses))
+        .reverse()
+
+    sortedPlayers.forEach((player, i) => {
+        scoreBoard.push(`${i + 1}. ${player.name}: ${player.wins - player.losses}`);
+    })
+
+    const embed = new EmbedBuilder()
+        .setTitle('Score Board');
+
+    if (sortedPlayers.length) {
+        embed.setDescription(buildList(scoreBoard));
+    }
+
+    message.channel.send({embeds: [embed]});
 }
