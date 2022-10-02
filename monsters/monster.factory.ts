@@ -32,10 +32,10 @@ const getMonsterInfo = async (rank: number) => {
     const classIndex = parseInt(type.split('_')[2]);
 
     return {
-        className: MONSTER_CLASS[classIndex],
+        className: MONSTER_CLASS[classIndex - 1],
         color: colors[rank -1],
         description: descriptions[id],
-        id: type + getVariation(variations, Number(monsters[type])),
+        id,
         name: type.split('_')[1]
     };
 };
