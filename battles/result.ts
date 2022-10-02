@@ -196,7 +196,7 @@ const rankUp = async (player: Player, channel: TextChannel) => {
 const MAX_ATTRIBUTES = 3;
 const MAX_ATTRIBUTE_GAIN = 50;
 
-const boostRandomStat = async (player: Player, reply: string[]) => {
+const boostAttributes = async (player: Player, reply: string[]) => {
     const attributes = await getList('attributes');
     const attributesGained: Dictionary<number> = {};
     let gainCounter = 1;
@@ -256,7 +256,7 @@ export const getBuffs = async (
     reply.push(boostLuck(player, monster));
     reply.push(checkStats(player));
 
-    await boostRandomStat(player, reply);
+    await boostAttributes(player, reply);
 
     channel.send(buildList(reply));
 };

@@ -1,7 +1,7 @@
 import { EmbedBuilder, Message } from 'discord.js';
 import { Player, PlayerInfo } from '../interfaces';
 import { MONSTER_CLASS } from '../maps';
-import { getMap, getValue } from '../storage/cache';
+import { getList, getMap, getValue } from '../storage/cache';
 import { getDoc, getPlayerDocs, storeDoc } from '../storage/database';
 import { Collector } from '../tools/collector';
 import { getRandom } from '../tools/math';
@@ -147,4 +147,25 @@ export const getScoreBoard = async (message: Message) => {
     }
 
     message.channel.send({embeds: [embed]});
+}
+
+export const getPlayerAttributes = async (playerInfo: PlayerInfo, message: Message) => {
+    const player = await getPlayer(playerInfo);
+    const attributes = await getList('attributes');
+    const list: string[] = [];
+
+    const embed = new EmbedBuilder()
+        .setThumbnail(message.author.avatarURL() || '')
+        .setTitle(`${player.name}'s Attributes`)
+        .setFooter({ text: `${player.attributes.length}/${attributes.length}` })
+
+    for (const attribute in player.attributes) {
+        list.push(`${attribute}: ${player.attributes[attribute]}`);
+    }
+
+    if (list.length) {
+        embed.setDescription(buildList(list))
+    }
+
+    message.channel.send({embeds: [embed]}); 
 }
