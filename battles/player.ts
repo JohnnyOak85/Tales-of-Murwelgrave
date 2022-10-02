@@ -103,8 +103,11 @@ export const getPlayerBestiary = async (playerInfo: PlayerInfo, message: Message
     const embed = new EmbedBuilder()
         .setThumbnail(message.author.avatarURL() || '')
         .setTitle(`${player.name} | Bestiary`)
-        .setDescription(buildList(monsters))
         .setFooter({ text: `${player.bestiary.length}/${totalMonsters}` })
 
+    if (monsters.length) {
+        embed.setDescription(buildList(monsters))
+    }
+    
     message.channel.send({embeds: [embed]}); 
 }
