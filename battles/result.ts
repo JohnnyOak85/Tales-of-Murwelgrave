@@ -177,7 +177,7 @@ const rankUp = async (player: Player, channel: TextChannel) => {
  * ATTRIBUTES
  */
 const MAX_ATTRIBUTES = 3;
-const MAX_ATTRIBUTE_GAIN = 100;
+const MAX_ATTRIBUTE_GAIN = 50;
 
 const boostRandomStat = async (player: Player, reply: string[]) => {
     const attributes = await getList('attributes');
