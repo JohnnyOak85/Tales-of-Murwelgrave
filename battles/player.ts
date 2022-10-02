@@ -157,7 +157,7 @@ export const getPlayerAttributes = async (playerInfo: PlayerInfo, message: Messa
     const embed = new EmbedBuilder()
         .setThumbnail(message.author.avatarURL() || '')
         .setTitle(`${player.name}'s Attributes`)
-        .setFooter({ text: `${player.attributes.length}/${attributes.length}` })
+        .setFooter({ text: `${Object.keys(player.attributes).length}/${attributes.length}` })
 
     for (const attribute in player.attributes) {
         list.push(`${attribute}: ${player.attributes[attribute]}`);
