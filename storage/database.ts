@@ -2,7 +2,7 @@ import PouchDB from 'pouchdb';
 import { ACTIVE_AREA, DB_URL } from '../config'; 
 import { Dictionary, GameAreas, GameConfig, Player } from '../interfaces';
 import { logError } from '../tools/logger';
-import { saveList, saveMap, saveValue } from './cache';
+import { deleteValue, getList, saveList, saveMap, saveValue } from './cache';
 
 // let db: PouchDB.Database<Dictionary<any>>;
 const db = new PouchDB<Dictionary<any>>(`${DB_URL}/game`);
@@ -91,6 +91,29 @@ const storeAreas = async () => {
     }
 };
 
+const storeLists = async (config: GameConfig) => {
+    const [attributes, colors, variations] = await Promise.all([
+        getList('attributes'),
+        getList('colors'),
+        getList('variations')
+    ])
+
+    if (attributes?.length !== config.attributes.length) {
+        deleteValue('attributes');
+        saveList('attributes', config.attributes);
+    }
+
+    if (colors?.length !== config.colors.length) {
+        deleteValue('colors');
+        saveList('colors', config.colors);
+    }
+
+    if (variations?.length !== config.variations.length) {
+        deleteValue('variations');
+        saveList('variations', config.variations);
+    }
+}
+
 const storeConfigs = async () => {
     try {
         const config = await getDoc<GameConfig>('config');
@@ -100,11 +123,9 @@ const storeConfigs = async () => {
             return;
         }
 
-        saveList('attributes', config.attributes);
-        saveList('colors', config.colors);
+        storeLists(config);
         saveMap('descriptions', config.descriptions);
         saveMap('ranks', config.ranks);
-        saveList('variations', config.variations);
     } catch (error) {
         logError(error, 'storeConfigs');
     }
