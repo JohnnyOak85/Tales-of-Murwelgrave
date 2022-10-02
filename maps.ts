@@ -10,3 +10,5 @@ export const MONSTER_CHANCE = {
     mid: 75,
     high: 95
 };
+
+export const MONSTER_CLASS = ['', 'Adept', 'Elite', 'Lord'];

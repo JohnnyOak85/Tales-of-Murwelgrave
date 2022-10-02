@@ -6,6 +6,7 @@ export type GameAreas = Dictionary<GameArea[]>;
 export interface GameConfig {
     attributes: string[];
     colors: string[];
+    descriptions: Dictionary<string>;
     ranks: Dictionary<string>;
     variations: string[];
 }
@@ -37,7 +38,9 @@ export interface Player extends Fighter {
 }
 
 export interface Monster extends Fighter {
+    className: string;
     color: string;
+    description: string;
     rank: number;
 }
 
