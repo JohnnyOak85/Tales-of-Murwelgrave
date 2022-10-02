@@ -1,4 +1,4 @@
-import { logError, logInfo } from './tools/logger';
+import { clearLog, logError, logInfo } from './tools/logger';
 import { setupGame } from './storage/database';
 import { spawnMonster, stopSpawner } from './monsters/spawner';
 import { ChannelType, Guild } from 'discord.js';
@@ -21,7 +21,9 @@ export const start = async () => {
     try {
         setCommands();
         startCache();
-
+        clearLog();
+        deleteValue('is-running');
+        
         console.log('Ready.');
         logInfo('Ready.');
     } catch (error) {

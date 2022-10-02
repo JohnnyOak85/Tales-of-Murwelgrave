@@ -63,13 +63,9 @@ const storeAreas = async () => {
             saveMap(`rank${index}`, rank);
 
             for (const monster of Object.keys(rank)) {
-                console.log(rank[monster]);
                 totalMonsters += rank[monster];
-                console.log(totalMonsters)
             }
         }
-
-        console.log(totalMonsters);
 
         saveValue('total-monsters', `${totalMonsters}`);
     } catch (error) {
