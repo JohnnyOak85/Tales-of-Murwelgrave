@@ -90,7 +90,7 @@ export const getPlayerStats = async (playerInfo: PlayerInfo, message: Message) =
 
 export const getPlayerBestiary = async (playerInfo: PlayerInfo, message: Message) => {
     const player = await getPlayer(playerInfo);
-    const bestiary = player.bestiary.sort((a, b) => a.localeCompare(b));
+    const bestiary = player.bestiary.length ? player.bestiary.sort((a, b) => a.localeCompare(b)) : [];
     const totalMonsters = await getValue('total_monsters');
     const monsters: string[] = [];
 

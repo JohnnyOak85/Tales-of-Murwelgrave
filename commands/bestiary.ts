@@ -18,7 +18,7 @@ module.exports = {
 
             getPlayerBestiary(playerInfo, message);
         } catch(error) {
-            logError(error, 'command -> stats');
+            logError(error, 'command -> bestiary');
         }
     }
 }
