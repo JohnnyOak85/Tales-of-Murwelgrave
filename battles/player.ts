@@ -104,7 +104,7 @@ export const getPlayerBestiary = async (playerInfo: PlayerInfo, message: Message
         let className = '';
 
         if (index) {
-            className = MONSTER_CLASS[index - 1];
+            className = ` ${MONSTER_CLASS[index - 1]}`;
             description = arr[3] ? monsterDescriptions[monster] : '';
         } else {
             description = arr[2] ? monsterDescriptions[monster] : '';
