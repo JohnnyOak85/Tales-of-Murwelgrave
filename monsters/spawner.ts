@@ -1,4 +1,4 @@
-import { ColorResolvable, EmbedBuilder, Message, TextChannel } from 'discord.js';
+import { ColorResolvable, EmbedBuilder, Message, TextChannel, time } from 'discord.js';
 import { MONSTER_DB } from '../config';
 import { Monster } from '../interfaces';
 import { MONSTER_RANK } from '../maps';
@@ -8,6 +8,13 @@ import { pickMonster } from './monster.factory';
 
 const COOL_DOWN = 30000;
 const TICKET = 'current';
+
+const timers = new Collector<NodeJS.Timeout>;
+let timer: NodeJS.Timeout;
+let activeMonster: {
+    message: Message;
+    monster: Monster;
+}
 
 const monsters = new Collector<{
     message: Message;
@@ -34,17 +41,23 @@ const cleanPrevious = async () => {
     }
 }
 
-export const getMonster = () => {
-    const item = monsters.getItem(TICKET);
+// export const getMonster = () => {
+//     const item = monsters.getItem(TICKET);
 
-    if (!item) return;
+//     if (!item) return;
 
-    clearInterval(item.timer);
+//     clearInterval(item.timer);
     
-    monsters.deleteItem(TICKET);
+//     monsters.deleteItem(TICKET);
 
-    return item.monster;
-};
+//     return item.monster;
+// };
+
+export const getMonster = () => {
+   if (timer) clearInterval(timer);
+
+    return activeMonster?.monster;
+}
 
 const buildEmbed = (monster: Monster) => {
     const embed = new EmbedBuilder()
@@ -56,41 +69,46 @@ const buildEmbed = (monster: Monster) => {
     return { embeds: [embed] };
 };
 
+// export const spawnMonster = async (channel: TextChannel) => {
+//     const timer = setInterval(async () => {
+//         const monster = await pickMonster();
+//         const embed = buildEmbed(monster);
+
+//         console.log('CLEANING PREVIOUS MONSTER')
+//         await cleanPrevious();
+
+//         console.log('SENDING NEW MESSAGE')
+//         const message = await channel.send(embed);
+
+//         console.log('ADDING ITEM')
+//         monsters.addItem(TICKET, { message, monster, timer });
+//     }, COOL_DOWN);
+// };
+
 export const spawnMonster = async (channel: TextChannel) => {
-    const timer = setInterval(async () => {
-        const monster = await pickMonster();
-        const embed = buildEmbed(monster);
+    clearInterval(timer);
 
-        console.log('CLEANING PREVIOUS MONSTER')
-        await cleanPrevious();
+    activeMonster.monster = await pickMonster();
+    const embed = buildEmbed(activeMonster.monster);
+    activeMonster.message.delete();
+    activeMonster.message = await channel.send(embed);
+    
+    timer = setInterval(() => spawnMonster(channel), COOL_DOWN);
+}
 
-        console.log('SENDING NEW MESSAGE')
-        const message = await channel.send(embed);
+// export const stopSpawner = async () => {
+//     const item = monsters.getItem(TICKET);
 
-        console.log('ADDING ITEM')
-        monsters.addItem(TICKET, { message, monster, timer });
-    }, COOL_DOWN);
-};
+//     if (!item) return;
+
+//     clearInterval(item.timer);
+
+//     item.message.delete();
+//     monsters.deleteItem(TICKET);
+// }
 
 export const stopSpawner = async () => {
-    const item = monsters.getItem(TICKET);
+    if (timer) clearInterval(timer);
 
-    if (!item) return;
-
-    clearInterval(item.timer);
-
-    item.message.delete();
-    monsters.deleteItem(TICKET);
+    if (activeMonster?.message) activeMonster.message.delete();
 }
-
-const ticker = () => {
-    setInterval(() => {
-        const item = monsters.getItem(TICKET);
-
-        if (!item) return;
-
-        console.log(item.timer)
-    }, 5000)
-}
-
-ticker()
