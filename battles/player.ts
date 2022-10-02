@@ -1,6 +1,6 @@
 import { EmbedBuilder, Message } from 'discord.js';
 import { Player, PlayerInfo } from '../interfaces';
-import { getMap } from '../storage/cache';
+import { getMap, getValue } from '../storage/cache';
 import { getDoc, storeDoc } from '../storage/database';
 import { Collector } from '../tools/collector';
 import { getRandom } from '../tools/math';
@@ -16,7 +16,7 @@ export const storePlayer = async (player: Player) => {
     storeDoc(player);
 }
 
-const getPlayerBestiary = (bestiary: string | string[] | undefined) =>
+const setPlayerBestiary = (bestiary: string | string[] | undefined) =>
     typeof bestiary === 'string' ? (JSON.parse(bestiary) as string[]) : bestiary || [];
 
 const getPlayerRank = async (playerTitles: string[]) => {
@@ -39,7 +39,7 @@ export const getPlayer = async (playerInfo: PlayerInfo) => {
         achievements: player?.achievements || [],
         attributes: player?.attributes || {},
         attack: Number(player?.attack) || getBaseAttack(),
-        bestiary: getPlayerBestiary(player?.bestiary),
+        bestiary: setPlayerBestiary(player?.bestiary),
         defense: Number(player?.defense) || getBaseDefense(),
         health: Number(player?.health) || getBaseHealth() + 50,
         id: player?.id || playerInfo.id,
@@ -78,12 +78,33 @@ export const getPlayerStats = async (playerInfo: PlayerInfo, message: Message) =
             value: `Wins: ${player.wins} | Losses: ${player.losses}`
         })
 
-        if (player.achievements.length) {
-            embed.addFields({
-                name: 'Achievements',
-                value: buildList(player.achievements)
-            })
-        }
+    if (player.achievements.length) {
+        embed.addFields({
+            name: 'Achievements',
+            value: buildList(player.achievements)
+        })
+    }
 
-        message.channel.send({embeds: [embed]});
+    message.channel.send({embeds: [embed]});
+}
+
+export const getPlayerBestiary = async (playerInfo: PlayerInfo, message: Message) => {
+    const player = await getPlayer(playerInfo);
+    const bestiary = player.bestiary.sort((a, b) => a.localeCompare(b));
+    const totalMonsters = await getValue('total_monsters');
+    const monsters: string[] = [];
+
+    for (const monster of bestiary) {
+        const arr = monster.split('_');
+
+        monsters.push(`${arr[1]} ${arr[2]}${arr[3] && ` ${arr[3]}`}`);
+    }
+
+    const embed = new EmbedBuilder()
+        .setThumbnail(message.author.avatarURL() || '')
+        .setTitle(`${player.name} | Bestiary`)
+        .setDescription(buildList(monsters))
+        .setFooter({ text: `${player.bestiary.length}/${totalMonsters}` })
+
+    message.channel.send({embeds: [embed]}); 
 }
