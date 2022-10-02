@@ -7,7 +7,7 @@ export const getStatus = async (channel: TextChannel) => {
     const log = getLog();
 
     channel.send(`Game is ${isRunning ? '' : 'not '}running`);
-    channel.send(log.join('\n'));
+    channel.send(`\`\`\`${log.join('\n')}\`\`\``);
 
-    return 
+    return;
 }
