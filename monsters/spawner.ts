@@ -3,6 +3,7 @@ import { MONSTER_DB } from '../config';
 import { Monster } from '../interfaces';
 import { MONSTER_RANK } from '../maps';
 import { Collector } from '../tools/collector';
+import { logError } from '../tools/logger';
 import { pickMonster } from './monster.factory';
 
 const COOL_DOWN = 30000;
@@ -23,7 +24,11 @@ const cleanPrevious = async () => {
         clearInterval(item.timer);
 
         await item.message.delete();
-    } catch(error) {}
+
+        monsters.deleteItem(TICKET);
+    } catch(error) {
+        logError(error, 'cleanPrevious');
+    }
 }
 
 export const getMonster = () => {
