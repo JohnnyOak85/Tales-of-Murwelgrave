@@ -7,7 +7,7 @@ import { getBool, getRandom, multiply } from '../tools/math';
 import { buildList } from '../tools/text';
 
 /**
- * Monsters
+ * MONSTERS
  */
 
 const getAreaName = () => {    
@@ -134,7 +134,7 @@ const levelUp = (player: Player) => {
 };
 
 /**
- * Rank
+ * RANK
  */
 const rankUp = async (player: Player, channel: TextChannel) => {
     if (player.level <= MAX_LEVEL) return '';
@@ -174,9 +174,10 @@ const rankUp = async (player: Player, channel: TextChannel) => {
 }
 
 /**
- * Fake Stats
+ * ATTRIBUTES
  */
 const MAX_ATTRIBUTES = 3;
+const MAX_ATTRIBUTE_GAIN = 100;
 
 const boostRandomStat = async (player: Player, reply: string[]) => {
     const attributes = await getList('attributes');
@@ -188,8 +189,13 @@ const boostRandomStat = async (player: Player, reply: string[]) => {
 
         if (chance) {
             const index = getRandom(attributes.length) - 1;
-            attributesGained[attributes[index]] = (attributesGained[attributes[index]] || 0) + 1;
-            player.attributes[attributes[index]] = (player.attributes[attributes[index]] || 0) + 1;
+            player.attributes[attributes[index]] = player.attributes[attributes[index]] || 0;
+            
+            if (player.attributes[attributes[index]] < MAX_ATTRIBUTE_GAIN) {
+                player.attributes[attributes[index]] += 1;
+                attributesGained[attributes[index]] = (attributesGained[attributes[index]] || 0) + 1;
+
+            }
         }
 
         count++;
