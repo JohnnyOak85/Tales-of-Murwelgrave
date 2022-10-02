@@ -16,11 +16,13 @@ const monsters = new Collector<{
 
 const cleanPrevious = async () => {
     try {
-        const previous = monsters.getItem(TICKET);
+        const item = monsters.getItem(TICKET);
         
-        if (!previous) return;
+        if (!item) return;
         
-        await previous.message.delete();
+        clearInterval(item.timer);
+
+        await item.message.delete();
     } catch(error) {}
 }
 
@@ -66,5 +68,6 @@ export const stopSpawner = async () => {
 
     clearInterval(item.timer);
 
+    item.message.delete();
     monsters.deleteItem(TICKET);
 }
