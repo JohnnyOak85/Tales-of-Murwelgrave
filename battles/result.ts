@@ -78,6 +78,21 @@ const boostStat = (player: Player, stat: 'attack' | 'defense', boost: number) =>
     return `**+${boost} ${stat[0].toUpperCase()}${stat.substring(1)}.**`;
 };
 
+const checkStats = (player: Player) => {
+    if (
+        player.attack >= STAT_CAP &&
+        player.defense >= STAT_CAP &&
+        player.health >= HEALTH_CAP &&
+        player.luck >= LUCK_CAP
+    ) {
+        player.achievements.push('Maxed all stats');
+
+        return 'You maxed up all you stats! Congratulations';
+    }
+
+    return '';
+}
+
 /**
  * HEALTH
  */
@@ -170,6 +185,8 @@ const rankUp = async (player: Player, channel: TextChannel) => {
         return '';
     }
 
+    player.achievements.push(`Ranked up to ${newRank.name}`);
+
     return `Rank up! **${oldRank.name} -> ${newRank.name}**`;
 }
 
@@ -182,9 +199,9 @@ const MAX_ATTRIBUTE_GAIN = 50;
 const boostRandomStat = async (player: Player, reply: string[]) => {
     const attributes = await getList('attributes');
     const attributesGained: Dictionary<number> = {};
-    let count = 1;
+    let gainCounter = 1;
 
-    while (count <= MAX_ATTRIBUTES) {
+    while (gainCounter <= MAX_ATTRIBUTES) {
         const chance = getBool();
 
         if (chance) {
@@ -198,11 +215,24 @@ const boostRandomStat = async (player: Player, reply: string[]) => {
             }
         }
 
-        count++;
+        gainCounter++;
     }
 
     for (const stat in attributesGained) {
         reply.push(`**+${attributesGained[stat]} ${stat}.**`)
+    }
+
+    let attributeCounter = 0;
+
+    for (const attribute of attributes) {
+        if (player.attributes[attribute] >= MAX_ATTRIBUTE_GAIN) {
+            attributeCounter++
+        }
+    }
+
+    if (attributeCounter === attributes.length) {
+        player.achievements.push('Maxed all attributes');
+        reply.push('Congratulations, you just maxed all possible attributes!');
     }
 }
 
@@ -224,6 +254,7 @@ export const getBuffs = async (
     reply.push(boostStat(player, 'attack', attackBoost));
     reply.push(boostStat(player, 'defense', defenseBoost));
     reply.push(boostLuck(player, monster));
+    reply.push(checkStats(player));
 
     await boostRandomStat(player, reply);
 
