@@ -82,3 +82,15 @@ export const stopSpawner = async () => {
     item.message.delete();
     monsters.deleteItem(TICKET);
 }
+
+const ticker = () => {
+    setInterval(() => {
+        const item = monsters.getItem(TICKET);
+
+        if (!item) return;
+
+        item.timer
+    }, 5000)
+}
+
+ticker()
