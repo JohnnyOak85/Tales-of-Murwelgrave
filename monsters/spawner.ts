@@ -14,6 +14,7 @@ let activeMonster: {
     monster?: Monster;
 };
 
+export const hasActiveBattle = () => activeBattle;
 export const toggleBattle = (toggle: boolean) => activeBattle = toggle;
 
 export const getMonster = () => {
