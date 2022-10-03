@@ -7,11 +7,14 @@ import { pickMonster } from './monster.factory';
 
 const COOL_DOWN = 30000;
 
+let activeBattle = false;
 let timer: NodeJS.Timeout;
 let activeMonster: {
     message?: Message;
     monster?: Monster;
 };
+
+export const toggleBattle = (toggle: boolean) => activeBattle = toggle;
 
 export const getMonster = () => {
     if (timer) clearInterval(timer);
@@ -43,6 +46,11 @@ const buildEmbed = (monster: Monster) => {
 };
 
 export const spawnMonster = async (channel: TextChannel) => {
+    if (activeBattle) {
+        setTimeout(() => spawnMonster(channel), COOL_DOWN);
+        return;
+    }
+
     clearInterval(timer);
 
     const monster = await pickMonster();
