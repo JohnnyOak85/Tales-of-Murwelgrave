@@ -2,6 +2,7 @@ import { ColorResolvable, EmbedBuilder, Message, TextChannel, time } from 'disco
 import { MONSTER_DB } from '../config';
 import { Monster } from '../interfaces';
 import { MONSTER_RANK } from '../maps';
+import { logError } from '../tools/logger';
 import { pickMonster } from './monster.factory';
 
 const COOL_DOWN = 30000;
@@ -20,6 +21,14 @@ export const getMonster = () => {
     return activeMonster?.monster;
 }
 
+const deleteMessage = () => {
+    try {
+        if (activeMonster?.message) activeMonster.message.delete();
+    } catch(error: any) {
+        if (error.status !== 404) logError(error, 'spawnMonster')
+    }
+}
+
 const buildEmbed = (monster: Monster) => {
     const embed = new EmbedBuilder()
         .setColor(monster.color as ColorResolvable)
@@ -36,7 +45,7 @@ export const spawnMonster = async (channel: TextChannel) => {
     const monster = await pickMonster();
     const embed = buildEmbed(monster);
     
-    if (activeMonster?.message) activeMonster.message.delete();
+    deleteMessage();
 
     activeMonster = {
         monster,
@@ -49,5 +58,5 @@ export const spawnMonster = async (channel: TextChannel) => {
 export const stopSpawner = async () => {
     if (timer) clearInterval(timer);
 
-    if (activeMonster?.message) activeMonster.message.delete();
+    deleteMessage();
 }
