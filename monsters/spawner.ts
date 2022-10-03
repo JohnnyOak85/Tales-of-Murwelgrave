@@ -21,11 +21,14 @@ export const getMonster = () => {
     return activeMonster?.monster;
 }
 
-const deleteMessage = () => {
+const deleteMessage = async () => {
     try {
-        if (activeMonster?.message) activeMonster.message.delete();
+        if (activeMonster?.message) {
+            const activeMessage = await activeMonster.message.channel.messages.fetch(activeMonster.message);
+            activeMessage?.delete();
+        }
     } catch(error: any) {
-        if (error.status !== 404) logError(error, 'spawnMonster')
+        if (error.status !== 404) logError(error, 'spawnMonster');
     }
 }
 
