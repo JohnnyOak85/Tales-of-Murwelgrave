@@ -1,15 +1,22 @@
 import { createClient } from 'redis';
 import { Dictionary } from '../interfaces';
+import { logError } from '../tools/logger';
 
 const client = createClient();
 const TOTAL_TRIES = 3;
 
+export const checkCache = () => client.isOpen;
+
 export const startCache = async () => {
+    if (client.isOpen) return;
+
     let counter = 0;
 
     try {
         await client.connect();
     } catch (error) {
+        logError(error, 'startCache');
+        
         if (counter < TOTAL_TRIES) {
             startCache();
             counter++;

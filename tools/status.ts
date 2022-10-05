@@ -1,12 +1,26 @@
 import { TextChannel } from "discord.js";
-import { getValue } from "../storage/cache"
+import { checkCache, getValue } from "../storage/cache"
 import { getLog } from "./logger";
+import { buildList } from "./text";
+
+const getGameStatus = async () => {
+    const isRunning = await getValue('is-running');
+ 
+    return `Game is ${isRunning ? '' : 'not '}running`;
+}
 
 export const getStatus = async (channel: TextChannel) => {
-    const isRunning = await getValue('is-running');
+    const isOpen = checkCache();    
     const log = getLog();
+    const status = ['Tales of Murwelgrave'];
 
-    channel.send(`Game is ${isRunning ? '' : 'not '}running`);
+    status.push(`Database is ${isOpen ? '' : 'not '}ready`);
+    
+    if (isOpen) {
+        status.push(await getGameStatus());
+    }
+    
+    channel.send(buildList(status));
     channel.send(`\`\`\`${log.join('\n')}\`\`\``);
 
     return;
