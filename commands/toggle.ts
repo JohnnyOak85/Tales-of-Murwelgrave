@@ -1,5 +1,5 @@
 import { ChannelType, Message } from "discord.js";
-import { startGame } from "../start";
+import { toggleGame } from "../start";
 import { logError } from "../tools/logger";
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
 
             if (!message.guild) return;
 
-            startGame(message.guild);
+            toggleGame(message.guild);
         } catch(error) {
             logError(error, 'command -> toggle');
         }

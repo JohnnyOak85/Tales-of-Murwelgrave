@@ -1,4 +1,4 @@
-import { clearLog, logError, logInfo } from './tools/logger';
+import { logError } from './tools/logger';
 import { setupGame } from './storage/database';
 import { spawnMonster, stopSpawner } from './monsters/spawner';
 import { ChannelType, Guild } from 'discord.js';
@@ -21,17 +21,15 @@ export const start = async () => {
     try {
         setCommands();
         startCache();
-        clearLog();
         deleteValue('is-running');
         
         console.log('Ready.');
-        logInfo('Ready.');
     } catch (error) {
         logError(error, 'start');
     }
 };
 
-export const startGame = async (guild: Guild) => {
+export const toggleGame = async (guild: Guild) => {
     const key = 'is-running';
 
     try {
@@ -57,6 +55,6 @@ export const startGame = async (guild: Guild) => {
             deleteValue(key);
         }
     } catch(error) {
-        logError(error, 'startGame');
+        logError(error, 'toggleGame');
     }
 }

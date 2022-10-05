@@ -1,5 +1,5 @@
 import { createLogger, format, transports } from 'winston';
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync } from 'fs'
 
 const logger = createLogger({
     level: 'info',
@@ -29,8 +29,4 @@ export const getLog = () => {
    })
 
    return log;
-}
-
-export const clearLog = () => {
-    writeFileSync('./logs/log.txt', '');
 }
