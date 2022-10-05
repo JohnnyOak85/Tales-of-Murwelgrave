@@ -2,7 +2,7 @@ import PouchDB from 'pouchdb';
 import { ACTIVE_AREA, DB_URL } from '../config'; 
 import { Dictionary, GameAreas, GameConfig, Player } from '../interfaces';
 import { logError } from '../tools/logger';
-import { deleteValue, getList, saveList, saveMap, saveValue } from './cache';
+import { deleteValue, getList, saveList, saveMap, saveValue, startCache } from './cache';
 
 // let db: PouchDB.Database<Dictionary<any>>;
 const db = new PouchDB<Dictionary<any>>(`${DB_URL}/game`);
@@ -133,6 +133,7 @@ const storeConfigs = async () => {
 
 export const setupGame = async () => {
     try {
+        await startCache()
         await Promise.all([storeAreas(), storeConfigs()]);
     } catch (error) {
         logError(error, 'setupGame');

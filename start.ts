@@ -20,7 +20,7 @@ const getChannel = async (guild: Guild) => {
 export const start = async () => {
     try {
         setCommands();
-        startCache();
+        await startCache();
         deleteValue('is-running');
         
         console.log('Ready.');
@@ -44,7 +44,7 @@ export const toggleGame = async (guild: Guild) => {
         if (!isRunning) {
             channel.send('Starting the game.');
 
-            setupGame();
+            await setupGame();
             spawnMonster(channel);
             
             saveValue(key, 'true');
