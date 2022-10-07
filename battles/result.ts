@@ -152,7 +152,7 @@ const levelUp = (player: Player) => {
  * RANK
  */
 const rankUp = async (player: Player, channel: TextChannel) => {
-    if (player.level <= MAX_LEVEL) return '';
+    if (player.level < MAX_LEVEL) return '';
 
     const oldRank = await channel.guild.roles.fetch(player.rank);
     
