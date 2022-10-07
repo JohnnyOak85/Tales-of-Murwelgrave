@@ -22,16 +22,18 @@ const getAreaName = () => {
 }
 
 const checkMonster = async (player: Player, monster: Monster) => {
-    const totalMonsters = await getValue('total_monsters');
+    const totalMonsters = await getValue('total-monsters');
 
     if (!player.bestiary.includes(monster.id)) {
         player.bestiary.push(monster.id);
     }
     
     if (!totalMonsters) return '';
+    
+    const achievement = `${getAreaName()} Conqueror`;
 
-    if (player.bestiary.length === parseInt(totalMonsters)) {
-        player.achievements.push(`${getAreaName()} Conqueror`);
+    if (player.bestiary.length === parseInt(totalMonsters) && !player.achievements.includes(achievement)) {
+        player.achievements.push(achievement);
         
         return `You just defeated every monster! Congratulations!`;
     }
