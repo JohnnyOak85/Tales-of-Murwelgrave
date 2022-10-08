@@ -4,6 +4,7 @@ import { getList, getMap } from '../storage/cache';
 import { getRandom } from '../tools/math';
 import { calcHealth, calcLevel, calcLuck, calcStats } from '../battles/stats';
 import { GAME_TYPE } from '../config';
+import { logError } from '../tools/logger';
 
 const getRank = (): number => {
     const chance = getRandom();
@@ -23,21 +24,26 @@ const getVariation = (variations: string[], num: number) => variations[getRandom
 const getType = (monsters: string[]) => monsters[getRandom(monsters.length - 1, 0)];
 
 const getMonsterInfo = async (rank: number) => {
-    const monsters = await getMap(`rank${rank - 1}`);
-    const variations = await getList('variations');
-    const descriptions = await getMap('descriptions');
-    const colors = await getList('colors');
-    const type = getType(Object.keys(monsters));
-    const id = type + getVariation(variations, Number(monsters[type]));
-    const classIndex = parseInt(type.split('_')[2]);
+    try {
+        const monsters = await getMap(`rank${rank - 1}`);
+        const variations = await getList('variations');
+        const descriptions = await getMap('descriptions');
+        const colors = await getList('colors');
+        const type = getType(Object.keys(monsters));
+        const id = type + getVariation(variations, Number(monsters[type]));
+        const classIndex = parseInt(type.split('_')[2]);
 
-    return {
-        className: MONSTER_CLASS[classIndex - 1],
-        color: colors[rank -1],
-        description: descriptions[id],
-        id,
-        name: type.split('_')[1]
-    };
+        return {
+            className: MONSTER_CLASS[classIndex - 1],
+            color: colors[rank - 1],
+            description: descriptions[id],
+            id,
+            name: type.split('_')[1]
+        };
+    } catch (error) {
+        logError(error, 'getMonsterInfo');
+        throw error;
+    }
 };
 
 const getMonsterStats = (rank: number) => {
@@ -54,9 +60,26 @@ const getMonsterStats = (rank: number) => {
 };
 
 export const pickMonster = async (): Promise<Monster> => {
-    const rank = getRank();
-    const { className, color, description, id, name } = await getMonsterInfo(rank);
-    const { attack, defense, health, level, luck } = getMonsterStats(rank);
+    try {
+        const rank = getRank();
+        const { className, color, description, id, name } = await getMonsterInfo(rank);
+        const { attack, defense, health, level, luck } = getMonsterStats(rank);
 
-    return { attack, className, color, defense, description, health, id, level, luck, name, rank };
+        return {
+            attack,
+            className,
+            color,
+            defense,
+            description,
+            health,
+            id,
+            level,
+            luck,
+            name,
+            rank
+        };
+    } catch (error) {
+        logError(error, 'pickMonster');
+        throw error;
+    }
 };
