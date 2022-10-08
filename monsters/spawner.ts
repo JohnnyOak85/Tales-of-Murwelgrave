@@ -29,10 +29,13 @@ const deleteMessage = async () => {
     try {
         if (activeMonster?.message) {
             const activeMessage = await activeMonster.message.channel.messages.fetch(activeMonster.message);
-            activeMessage?.delete();
+
+            if (!activeMessage?.deletable) return;
+
+            activeMessage.delete();
         }
     } catch(error: any) {
-        if (error.status !== 404) logError(error, 'spawnMonster');
+        logError(error, 'spawnMonster');
     }
 }
 
