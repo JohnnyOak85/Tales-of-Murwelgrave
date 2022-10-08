@@ -72,8 +72,18 @@ const splitExp = (experience: number) => {
     }
 };
 
+const boostStats = (player: Player, monsterLevel: number, reply: string[]) => {
+    if (player.attack + player.defense >= STAT_CAP) return '';
+
+    const experience = Math.max(1, Math.floor((monsterLevel * 4) / player.level));
+    const { attackBoost, defenseBoost } = splitExp(experience);
+
+    reply.push(boostStat(player, 'attack', attackBoost));
+    reply.push(boostStat(player, 'defense', defenseBoost));
+}
+
 const boostStat = (player: Player, stat: 'attack' | 'defense', boost: number) => {
-    if (!boost || player[stat] >= STAT_CAP) return '';
+    if (!boost) return '';
 
     player[stat] += boost;
 
@@ -81,13 +91,15 @@ const boostStat = (player: Player, stat: 'attack' | 'defense', boost: number) =>
 };
 
 const checkStats = (player: Player) => {
+    const achievement = 'Maxed all stats';
+
     if (
-        player.attack >= STAT_CAP &&
-        player.defense >= STAT_CAP &&
+        player.attack + player.defense >= STAT_CAP &&
         player.health >= HEALTH_CAP &&
-        player.luck >= LUCK_CAP
+        player.luck >= LUCK_CAP &&
+        !player.achievements.includes(achievement)
     ) {
-        player.achievements.push('Maxed all stats');
+        player.achievements.push(achievement);
 
         return 'You maxed up all you stats! Congratulations';
     }
@@ -153,6 +165,7 @@ const levelUp = (player: Player) => {
 /**
  * RANK
  */
+// TODO Players are ranking twice in a row
 const rankUp = async (player: Player, channel: TextChannel) => {
     if (player.level < MAX_LEVEL) return '';
 
@@ -174,16 +187,16 @@ const rankUp = async (player: Player, channel: TextChannel) => {
         member.roles.add(newRank);
     } catch(error) {
         if ((error as DiscordAPIError).status === 403) {
-            logError(error, 'rankUp');
+            logError(error, 'rankUp -> forbidden');
             return '';
         }
 
         if ((error as DiscordAPIError).status === 404 && (error as DiscordAPIError).method === 'DELETE') {
-            logError(error, 'rankUp');
+            logError(error, 'rankUp -> not found');
             return '';
         }
 
-        console.log(error);
+        logError(error, 'rankUp');
         return '';
     }
 
@@ -232,8 +245,10 @@ const boostAttributes = async (player: Player, reply: string[]) => {
         }
     }
 
-    if (attributeCounter === attributes.length) {
-        player.achievements.push('Maxed all attributes');
+    const achievement = 'Maxed all attributes';
+
+    if (attributeCounter === attributes.length && !player.achievements.includes(achievement)) {
+        player.achievements.push(achievement);
         reply.push('Congratulations, you just maxed all possible attributes!');
     }
 }
@@ -245,16 +260,13 @@ export const getBuffs = async (
 ) => {
     const reply = [`**${player.name}** wins!`];
     const currentLevel = player.level;
-    const experience = Math.max(1, Math.floor((monster.level * 4) / player.level));
-    const { attackBoost, defenseBoost } = splitExp(experience);
     
     reply.push(checkBoss(player, monster));
     reply.push(await checkMonster(player, monster));
     reply.push(levelUp(player));
     reply.push(await rankUp(player, channel));
     reply.push(boostHealth(player, currentLevel));
-    reply.push(boostStat(player, 'attack', attackBoost));
-    reply.push(boostStat(player, 'defense', defenseBoost));
+    boostStats(player, monster.level, reply);
     reply.push(boostLuck(player, monster));
     reply.push(checkStats(player));
 
