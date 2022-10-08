@@ -10,13 +10,13 @@ const client = new Client({
 
 client.login(TOKEN);
 
-client.on('ready', async () =>{    
+client.on('ready', async () => {
     start();
 });
 
 client.on('messageCreate', message => {
     executeCommand(message);
-})
+});
 
 client.on('guildMemberAdd', async member => {
     const role = await member.guild.roles.fetch(PLAYER_ROLE_ID || '');
@@ -27,7 +27,7 @@ client.on('guildMemberAdd', async member => {
     }
 
     member.roles.add(role);
-})
+});
 
 client.on('error', error => {
     logError(error, 'client');

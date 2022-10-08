@@ -1,6 +1,6 @@
-import { ChannelType, Message } from "discord.js";
-import { logError } from "../tools/logger";
-import { getStatus } from "../tools/status";
+import { ChannelType, Message } from 'discord.js';
+import { logError } from '../tools/logger';
+import { getStatus } from '../tools/status';
 
 module.exports = {
     name: 'status',
@@ -8,11 +8,15 @@ module.exports = {
     usage: ' ',
     execute: async (message: Message) => {
         try {
-            if (!message.member?.permissions.has("Administrator") || message.channel.type !== ChannelType.GuildText) return;
+            if (
+                !message.member?.permissions.has('Administrator') ||
+                message.channel.type !== ChannelType.GuildText
+            )
+                return;
 
             getStatus(message.channel);
-        } catch(error) {
+        } catch (error) {
             logError(error, 'command -> toggle');
         }
     }
-}
+};

@@ -1,9 +1,9 @@
-import { Message } from "discord.js";
+import { Message } from 'discord.js';
 import { readdirSync } from 'fs';
-import { CHANNEL_ID } from "../config";
-import { Command } from "../interfaces";
-import { Collector } from "./collector";
-import { logError } from "./logger";
+import { CHANNEL_ID } from '../config';
+import { Command } from '../interfaces';
+import { Collector } from './collector';
+import { logError } from './logger';
 
 const commands = new Collector<Command>();
 

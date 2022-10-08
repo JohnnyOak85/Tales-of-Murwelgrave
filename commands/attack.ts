@@ -14,8 +14,8 @@ module.exports = {
                 id: message.author.id,
                 name: message.author.username,
                 titles: message.member.roles.valueOf().map(role => role.id)
-            }
-            
+            };
+
             battle(message.channel, playerInfo);
         } catch (error) {
             logError(error, 'command -> attack');

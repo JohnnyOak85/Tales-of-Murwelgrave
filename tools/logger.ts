@@ -1,5 +1,5 @@
 import { createLogger, format, transports } from 'winston';
-import { readFileSync } from 'fs'
+import { readFileSync } from 'fs';
 
 const logger = createLogger({
     level: 'info',
@@ -19,14 +19,14 @@ export const logError = (error: any, func: string) =>
 export const logInfo = (message: string) => logger.log('info', `${message}\n${getTime()}`);
 
 export const getLog = () => {
-   const file = readFileSync('./logs/log.txt').toString().split("\n");
-   const log = ['Log:'];
+    const file = readFileSync('./logs/log.txt').toString().split('\n');
+    const log = ['Log:'];
 
-   file.forEach(line => {
+    file.forEach(line => {
         if (line.startsWith('[')) {
             log.push(line);
         }
-   })
+    });
 
-   return log;
-}
+    return log;
+};

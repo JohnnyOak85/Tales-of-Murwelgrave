@@ -1,6 +1,6 @@
-import { Message } from "discord.js";
-import { getScoreBoard } from "../battles/player";
-import { logError } from "../tools/logger";
+import { Message } from 'discord.js';
+import { getScoreBoard } from '../battles/player';
+import { logError } from '../tools/logger';
 
 module.exports = {
     name: 'score',
@@ -11,8 +11,8 @@ module.exports = {
             if (!message.member) return;
 
             getScoreBoard(message);
-        } catch(error) {
+        } catch (error) {
             logError(error, 'command -> score');
         }
     }
-}
+};

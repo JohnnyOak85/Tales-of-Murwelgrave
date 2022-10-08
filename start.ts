@@ -22,7 +22,7 @@ export const start = async () => {
         setCommands();
         await startCache();
         deleteValue('is-running');
-        
+
         console.log('Ready.');
     } catch (error) {
         logError(error, 'start');
@@ -35,7 +35,7 @@ export const toggleGame = async (guild: Guild) => {
     try {
         const isRunning = await getValue(key);
         const channel = await getChannel(guild);
-        
+
         if (!channel) {
             logError('NO CHANNEL FOUND', 'start');
             return;
@@ -46,15 +46,15 @@ export const toggleGame = async (guild: Guild) => {
 
             await setupGame();
             spawnMonster(channel);
-            
+
             saveValue(key, 'true');
         } else {
             channel.send('Ending the game');
-            
+
             stopSpawner();
             deleteValue(key);
         }
-    } catch(error) {
+    } catch (error) {
         logError(error, 'toggleGame');
     }
-}
+};

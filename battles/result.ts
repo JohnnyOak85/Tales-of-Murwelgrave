@@ -10,16 +10,16 @@ import { buildList } from '../tools/text';
  * MONSTERS
  */
 
-const getAreaName = () => {    
+const getAreaName = () => {
     const split = ACTIVE_AREA.split('_');
     const name = [];
 
     for (let word of split) {
-        name.push(word[0].toUpperCase() + word.substring(1))
+        name.push(word[0].toUpperCase() + word.substring(1));
     }
 
     return name.join(' ');
-}
+};
 
 const checkMonster = async (player: Player, monster: Monster) => {
     const totalMonsters = await getValue('total-monsters');
@@ -27,23 +27,26 @@ const checkMonster = async (player: Player, monster: Monster) => {
     if (!player.bestiary.includes(monster.id)) {
         player.bestiary.push(monster.id);
     }
-    
+
     if (!totalMonsters) return '';
-    
+
     const achievement = `${getAreaName()} Conqueror`;
 
-    if (player.bestiary.length === parseInt(totalMonsters) && !player.achievements.includes(achievement)) {
+    if (
+        player.bestiary.length === parseInt(totalMonsters) &&
+        !player.achievements.includes(achievement)
+    ) {
         player.achievements.push(achievement);
-        
+
         return `You just defeated every monster! Congratulations!`;
     }
 
     return '';
-}
+};
 
 const checkBoss = (player: Player, monster: Monster) => {
     if (monster.rank < 4) return '';
-    
+
     const achievement = `${monster.name} Slayer`;
 
     if (!player.achievements.includes(achievement)) {
@@ -51,7 +54,7 @@ const checkBoss = (player: Player, monster: Monster) => {
     }
 
     return `You just defeated the **${monster.name}**! Congratulations!`;
-}
+};
 
 /**
  * STATS
@@ -64,12 +67,12 @@ const splitExp = (experience: number) => {
     const comparer = experience - split;
 
     const bigSlice = comparer > split ? comparer : split;
-    const littleSlice = comparer < split ? comparer : split
+    const littleSlice = comparer < split ? comparer : split;
 
     return {
-         attackBoost : attackBuff ? bigSlice : littleSlice,
-         defenseBoost : attackBuff ? littleSlice : bigSlice
-    }
+        attackBoost: attackBuff ? bigSlice : littleSlice,
+        defenseBoost: attackBuff ? littleSlice : bigSlice
+    };
 };
 
 const boostStats = (player: Player, monsterLevel: number, reply: string[]) => {
@@ -80,7 +83,7 @@ const boostStats = (player: Player, monsterLevel: number, reply: string[]) => {
 
     reply.push(boostStat(player, 'attack', attackBoost));
     reply.push(boostStat(player, 'defense', defenseBoost));
-}
+};
 
 const boostStat = (player: Player, stat: 'attack' | 'defense', boost: number) => {
     if (!boost) return '';
@@ -105,7 +108,7 @@ const checkStats = (player: Player) => {
     }
 
     return '';
-}
+};
 
 /**
  * HEALTH
@@ -121,8 +124,8 @@ const boostHealth = (player: Player, currentLevel: number) => {
     const gain = getRandom(MAX_HEALTH_CONTROL, MIN_HEALTH_CONTROL);
     player.health += gain + multiply(player.level);
 
-    return `**+${gain} Health.**`
-}
+    return `**+${gain} Health.**`;
+};
 
 /**
  * LUCK
@@ -134,14 +137,15 @@ const boostLuck = (player: Player, monster: Monster) => {
     if (player.luck >= LUCK_CAP) return '';
 
     const playerStats = player.level + player.attack + player.defense + player.health + player.luck;
-    const monsterStats = monster.level + monster.attack + monster.defense + monster.health + monster.luck;
+    const monsterStats =
+        monster.level + monster.attack + monster.defense + monster.health + monster.luck;
     const chance = getRandom();
 
     if (playerStats >= monsterStats || chance > LUCK_CHANCE) return '';
-    
+
     player.luck += 1;
 
-    return `**+1 Luck.**`;    
+    return `**+1 Luck.**`;
 };
 
 /**
@@ -151,7 +155,7 @@ const MAX_LEVEL = 20;
 
 const levelUp = (player: Player) => {
     if (player.level >= MAX_LEVEL) return '';
-    
+
     const levelControl = (player.level + 1) * 100;
     const playerStats = player.attack + player.defense;
 
@@ -170,7 +174,7 @@ const rankUp = async (player: Player, channel: TextChannel) => {
     if (player.level < MAX_LEVEL) return '';
 
     const oldRank = await channel.guild.roles.fetch(player.rank);
-    
+
     if (!oldRank?.id) return '';
 
     const playerRanks = await getMap('ranks');
@@ -185,13 +189,16 @@ const rankUp = async (player: Player, channel: TextChannel) => {
     try {
         member.roles.remove(oldRank);
         member.roles.add(newRank);
-    } catch(error) {
+    } catch (error) {
         if ((error as DiscordAPIError).status === 403) {
             logError(error, 'rankUp -> forbidden');
             return '';
         }
 
-        if ((error as DiscordAPIError).status === 404 && (error as DiscordAPIError).method === 'DELETE') {
+        if (
+            (error as DiscordAPIError).status === 404 &&
+            (error as DiscordAPIError).method === 'DELETE'
+        ) {
             logError(error, 'rankUp -> not found');
             return '';
         }
@@ -203,7 +210,7 @@ const rankUp = async (player: Player, channel: TextChannel) => {
     player.achievements.push(`Ranked up to ${newRank.name}`);
 
     return `Rank up! **${oldRank.name} -> ${newRank.name}**`;
-}
+};
 
 /**
  * ATTRIBUTES
@@ -222,11 +229,11 @@ const boostAttributes = async (player: Player, reply: string[]) => {
         if (chance) {
             const index = getRandom(attributes.length) - 1;
             player.attributes[attributes[index]] = player.attributes[attributes[index]] || 0;
-            
+
             if (player.attributes[attributes[index]] < MAX_ATTRIBUTE_GAIN) {
                 player.attributes[attributes[index]] += 1;
-                attributesGained[attributes[index]] = (attributesGained[attributes[index]] || 0) + 1;
-
+                attributesGained[attributes[index]] =
+                    (attributesGained[attributes[index]] || 0) + 1;
             }
         }
 
@@ -234,14 +241,14 @@ const boostAttributes = async (player: Player, reply: string[]) => {
     }
 
     for (const stat in attributesGained) {
-        reply.push(`**+${attributesGained[stat]} ${stat}.**`)
+        reply.push(`**+${attributesGained[stat]} ${stat}.**`);
     }
 
     let attributeCounter = 0;
 
     for (const attribute of attributes) {
         if (player.attributes[attribute] >= MAX_ATTRIBUTE_GAIN) {
-            attributeCounter++
+            attributeCounter++;
         }
     }
 
@@ -251,16 +258,12 @@ const boostAttributes = async (player: Player, reply: string[]) => {
         player.achievements.push(achievement);
         reply.push('Congratulations, you just maxed all possible attributes!');
     }
-}
+};
 
-export const getBuffs = async (
-    player: Player,
-    monster: Monster,
-    channel: TextChannel
-) => {
+export const getBuffs = async (player: Player, monster: Monster, channel: TextChannel) => {
     const reply = [`**${player.name}** wins!`];
     const currentLevel = player.level;
-    
+
     reply.push(checkBoss(player, monster));
     reply.push(await checkMonster(player, monster));
     reply.push(levelUp(player));

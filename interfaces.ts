@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { Message } from 'discord.js';
 
 type GameArea = Dictionary<number>;
 export type GameAreas = Dictionary<GameArea[]>;

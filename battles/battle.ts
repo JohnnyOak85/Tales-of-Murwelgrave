@@ -1,6 +1,12 @@
 import { TextChannel } from 'discord.js';
 import { Fighter, Monster, Player, PlayerInfo } from '../interfaces';
-import { clearBattle, getMonster, hasActiveBattle, inactivateBattle, spawnMonster } from '../monsters/spawner';
+import {
+    clearBattle,
+    getMonster,
+    hasActiveBattle,
+    inactivateBattle,
+    spawnMonster
+} from '../monsters/spawner';
 import { getPlayer, storePlayer } from './player';
 import { multiply, getRandom, roundDown, getBool } from '../tools/math';
 import { getBuffs } from './result';
@@ -97,7 +103,7 @@ const startRounds = async (player: Player, monster: Monster, channel: TextChanne
         attacker = boutWinner;
         defender = boutLoser;
 
-        winner = boutWinner
+        winner = boutWinner;
         channel.send(summary);
     }
 
@@ -110,7 +116,7 @@ const startRounds = async (player: Player, monster: Monster, channel: TextChanne
         player.losses += 1;
         await channel.send(`${player.name} lost...`);
     }
-    
+
     storePlayer(player);
     spawnMonster(channel);
 };
@@ -118,7 +124,7 @@ const startRounds = async (player: Player, monster: Monster, channel: TextChanne
 export const battle = async (channel: TextChannel, playerInfo: PlayerInfo) => {
     try {
         if (hasActiveBattle()) return;
-        
+
         const monster = getMonster();
         const player = await getPlayer(playerInfo);
 
@@ -128,7 +134,7 @@ export const battle = async (channel: TextChannel, playerInfo: PlayerInfo) => {
 
         fighters.addItem(monster.id, monster);
         fighters.addItem(player.id, player);
-        
+
         startRounds(player, monster, channel);
     } catch (error) {
         logError(error, 'battle');

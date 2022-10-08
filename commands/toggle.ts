@@ -1,6 +1,6 @@
-import { ChannelType, Message } from "discord.js";
-import { toggleGame } from "../start";
-import { logError } from "../tools/logger";
+import { ChannelType, Message } from 'discord.js';
+import { toggleGame } from '../start';
+import { logError } from '../tools/logger';
 
 module.exports = {
     name: 'toggle',
@@ -8,13 +8,17 @@ module.exports = {
     usage: ' ',
     execute: async (message: Message) => {
         try {
-            if (!message.member?.permissions.has("Administrator") || message.channel.type !== ChannelType.GuildText) return;
+            if (
+                !message.member?.permissions.has('Administrator') ||
+                message.channel.type !== ChannelType.GuildText
+            )
+                return;
 
             if (!message.guild) return;
 
             toggleGame(message.guild);
-        } catch(error) {
+        } catch (error) {
             logError(error, 'command -> toggle');
         }
     }
-}
+};

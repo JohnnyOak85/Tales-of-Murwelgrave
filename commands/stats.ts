@@ -1,6 +1,6 @@
-import { Message } from "discord.js";
-import { getPlayerStats } from "../battles/player";
-import { logError } from "../tools/logger";
+import { Message } from 'discord.js';
+import { getPlayerStats } from '../battles/player';
+import { logError } from '../tools/logger';
 
 module.exports = {
     name: 'stats',
@@ -14,11 +14,11 @@ module.exports = {
                 id: message.author.id,
                 name: message.author.username,
                 titles: message.member.roles.valueOf().map(role => role.id)
-            }
+            };
 
             getPlayerStats(playerInfo, message);
-        } catch(error) {
+        } catch (error) {
             logError(error, 'command -> stats');
         }
     }
-}
+};
