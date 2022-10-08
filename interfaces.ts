@@ -56,3 +56,10 @@ export interface PlayerInfo {
     name: string;
     titles: string[];
 }
+
+export interface Battle {
+    active: boolean;
+    message?: Message;
+    monster?: Monster;
+    timer?: NodeJS.Timeout;
+}

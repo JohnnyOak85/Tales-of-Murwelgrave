@@ -1,34 +1,34 @@
-import { ColorResolvable, EmbedBuilder, Message, TextChannel, time } from 'discord.js';
+import { ColorResolvable, EmbedBuilder, TextChannel } from 'discord.js';
 import { MONSTER_DB } from '../config';
-import { Monster } from '../interfaces';
+import { Battle, Monster } from '../interfaces';
 import { MONSTER_RANK } from '../maps';
 import { logError } from '../tools/logger';
 import { pickMonster } from './monster.factory';
 
 const COOL_DOWN = 30000;
 
-let activeBattle = false;
-let timer: NodeJS.Timeout;
-let activeMonster: {
-    message?: Message;
-    monster?: Monster;
-};
+const currentMonster: Battle = {
+    active: false
+}
 
-export const hasActiveBattle = () => activeBattle;
-export const toggleBattle = (toggle: boolean) => activeBattle = toggle;
+export const hasActiveBattle = () => currentMonster.active;
+export const inactivateBattle = () => currentMonster.active = false;
+export const getMonster = () => currentMonster?.monster;
 
-export const getMonster = () => {
-    if (timer) clearInterval(timer);
+export const clearBattle = () => {
+    currentMonster.active = true;
 
-    delete activeMonster.message;
-
-    return activeMonster?.monster;
+    if (currentMonster.timer) clearInterval(currentMonster.timer);
+    
+    delete currentMonster.message;
+    delete currentMonster.monster;
+    delete currentMonster.timer;
 }
 
 const deleteMessage = async () => {
     try {
-        if (activeMonster?.message) {
-            const activeMessage = await activeMonster.message.channel.messages.fetch(activeMonster.message);
+        if (currentMonster?.message) {
+            const activeMessage = await currentMonster.message.channel.messages.fetch(currentMonster.message);
 
             if (!activeMessage?.deletable) return;
 
@@ -50,28 +50,27 @@ const buildEmbed = (monster: Monster) => {
 };
 
 export const spawnMonster = async (channel: TextChannel) => {
-    if (activeBattle) {
+    if (currentMonster.active) {
         setTimeout(() => spawnMonster(channel), COOL_DOWN);
         return;
     }
 
-    clearInterval(timer);
+    if (currentMonster.timer) {
+        clearInterval(currentMonster.timer);
+    }
 
     const monster = await pickMonster();
     const embed = buildEmbed(monster);
     
     deleteMessage();
 
-    activeMonster = {
-        monster,
-        message: await channel.send(embed)
-    }
-    
-    timer = setInterval(() => spawnMonster(channel), COOL_DOWN);
+    currentMonster.message = await channel.send(embed);
+    currentMonster.monster = monster;
+    currentMonster.timer = setInterval(() => spawnMonster(channel), COOL_DOWN);
 }
 
 export const stopSpawner = async () => {
-    if (timer) clearInterval(timer);
+    if (currentMonster.timer) clearInterval(currentMonster.timer);
 
     deleteMessage();
 }

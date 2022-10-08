@@ -1,6 +1,6 @@
 import { TextChannel } from 'discord.js';
 import { Fighter, Monster, Player, PlayerInfo } from '../interfaces';
-import { getMonster, hasActiveBattle, spawnMonster, toggleBattle } from '../monsters/spawner';
+import { clearBattle, getMonster, hasActiveBattle, inactivateBattle, spawnMonster } from '../monsters/spawner';
 import { getPlayer, storePlayer } from './player';
 import { multiply, getRandom, roundDown, getBool } from '../tools/math';
 import { getBuffs } from './result';
@@ -109,9 +109,9 @@ const startRounds = (player: Player, monster: Monster, channel: TextChannel) => 
         channel.send(`${player.name} lost...`);
     }
 
+    inactivateBattle();
     storePlayer(player);
     spawnMonster(channel);
-    toggleBattle(false);
 };
 
 export const battle = async (channel: TextChannel, playerInfo: PlayerInfo) => {
@@ -123,7 +123,7 @@ export const battle = async (channel: TextChannel, playerInfo: PlayerInfo) => {
 
         if (!monster || !player) return;
 
-        toggleBattle(true);
+        clearBattle();
 
         fighters.addItem(monster.id, monster);
         fighters.addItem(player.id, player);
