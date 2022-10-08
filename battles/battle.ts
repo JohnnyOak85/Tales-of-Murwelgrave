@@ -86,7 +86,7 @@ const playRound = (attacker: Fighter, defender: Fighter) => {
     return checkDefense(attacker, defender, summary);
 };
 
-const startRounds = (player: Player, monster: Monster, channel: TextChannel) => {
+const startRounds = async (player: Player, monster: Monster, channel: TextChannel) => {
     let attacker: Fighter = Object.assign({}, player);
     let defender: Fighter = Object.assign({}, monster);
     let winner: Fighter = attacker;
@@ -101,15 +101,16 @@ const startRounds = (player: Player, monster: Monster, channel: TextChannel) => 
         channel.send(summary);
     }
 
+    inactivateBattle();
+
     if (winner.id === player.id) {
         player.wins += 1;
-        getBuffs(player, monster, channel);
+        await getBuffs(player, monster, channel);
     } else {
         player.losses += 1;
-        channel.send(`${player.name} lost...`);
+        await channel.send(`${player.name} lost...`);
     }
-
-    inactivateBattle();
+    
     storePlayer(player);
     spawnMonster(channel);
 };
