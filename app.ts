@@ -5,7 +5,8 @@ import { executeCommand } from './tools/commands';
 import { PLAYER_ROLE_ID, TOKEN } from './config';
 
 const client = new Client({
-    intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent']
+    intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent'],
+    restRequestTimeout: 30000
 });
 
 client.login(TOKEN);
