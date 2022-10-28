@@ -6,7 +6,9 @@ import { PLAYER_ROLE_ID, TOKEN } from './config';
 
 const client = new Client({
     intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent'],
-    restRequestTimeout: 30000
+    rest: {
+       timeout: 30_000
+    }
 });
 
 client.login(TOKEN);
