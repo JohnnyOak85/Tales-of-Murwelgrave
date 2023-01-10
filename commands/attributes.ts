@@ -1,14 +1,14 @@
-import { ChannelType, Message } from 'discord.js';
-import { battle } from '../battles/battle';
+import { Message } from 'discord.js';
+import { getPlayerAttributes } from '../battles/player';
 import { logError } from '../tools/logger';
 
 module.exports = {
-    name: 'attack',
-    description: `Attack a spawned monster!`,
+    name: 'attributes',
+    description: 'Check your attributes',
     usage: ' ',
     execute: async (message: Message) => {
         try {
-            if (message.channel.type !== ChannelType.GuildText || !message.member) return;
+            if (!message.member) return;
 
             const playerInfo = {
                 id: message.author.id,
@@ -16,9 +16,9 @@ module.exports = {
                 titles: message.member.roles.valueOf().map(role => role.id)
             };
 
-            battle(message.channel, playerInfo);
+            getPlayerAttributes(playerInfo, message);
         } catch (error) {
-            logError(error, 'command -> attack');
+            logError(error, 'command -> bestiary');
         }
     }
 };

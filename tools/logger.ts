@@ -1,5 +1,5 @@
 import { createLogger, format, transports } from 'winston';
-import { getDate } from './utils';
+import { readFileSync } from 'fs';
 
 const logger = createLogger({
     level: 'info',
@@ -8,6 +8,25 @@ const logger = createLogger({
     transports: [new transports.File({ filename: 'logs/log.txt' })]
 });
 
-export const logError = (error: any) =>
-    logger.log('error', `${error.message}\n${error}\nTime: ${getDate()}`);
-export const logInfo = (message: string) => logger.log('info', `${message}\nTime: ${getDate()}`);
+const getFuncName = (func: string) => (func ? `Function: ${func}` : '');
+const getTime = () => `Time: ${new Date()}`;
+
+export const logError = (error: any, func: string) =>
+    typeof error === 'string'
+        ? logger.log('error', `${error}\n${getFuncName(func)}\n${getTime()}`)
+        : logger.log('error', `${error.message}\n${error}\n${getFuncName(func)}\n${getTime()}`);
+
+export const logInfo = (message: string) => logger.log('info', `${message}\n${getTime()}`);
+
+export const getLog = () => {
+    const file = readFileSync('./logs/log.txt').toString().split('\n');
+    const log = ['Log:'];
+
+    file.forEach(line => {
+        if (line.startsWith('[')) {
+            log.push(line);
+        }
+    });
+
+    return log;
+};

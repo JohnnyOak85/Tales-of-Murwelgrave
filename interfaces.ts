@@ -1,59 +1,65 @@
 import { Message } from 'discord.js';
 
-type MonsterVariation = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J';
-type MonsterRank = Dictionary<MonsterVariation[]>;
-export type GameArea = MonsterRank[];
+type GameArea = Dictionary<number>;
+export type GameAreas = Dictionary<GameArea[]>;
 
-export interface RaffleTicket {
-    ticket: string;
-    timer: NodeJS.Timeout;
+export interface GameConfig {
+    attributes: string[];
+    colors: string[];
+    descriptions: Dictionary<string>;
+    ranks: Dictionary<string>;
+    variations: string[];
 }
 
 export interface Dictionary<T> {
     [x: string]: T;
 }
 
-export interface GameConfig {
-    list: string[] | Dictionary<string> | Dictionary<GameArea>;
+export interface Fighter {
+    attack: number;
+    boost?: number;
+    damage?: number;
+    defense: number;
+    health: number;
+    id: string;
+    level: number;
+    luck: number;
+    name: string;
+}
+
+export interface Player extends Fighter {
+    achievements: string[];
+    attributes: Dictionary<number>;
+    bestiary: string[];
+    losses: number;
+    messages: number;
+    rank: string;
+    wins: number;
+}
+
+export interface Monster extends Fighter {
+    className: string;
+    color: string;
+    description: string;
+    rank: number;
 }
 
 export interface Command {
     description: string;
-    execute: (message: Message, args?: string[]) => void;
-    manager: boolean;
+    execute: (message: Message) => void;
     name: string;
     usage: string;
 }
 
-const rank: MonsterRank = {
-    '004_Flower_': ['A', 'B', 'C', 'D', 'E'],
-    '034_Carrot_': ['A', 'B', 'C', 'D', 'E'],
-    '049_Nutsy_': ['A', 'B', 'C', 'D', 'E']
-};
+export interface PlayerInfo {
+    id: string;
+    name: string;
+    titles: string[];
+}
 
-const forest: GameArea = [rank];
-
-const doc: GameConfig = {
-    list: { forest }
-};
-
-/**
- * AREA DOC EXAMPLE
- *
- * const test: AreaDoc = {
- *   list: {
- *      forest: [
- *          {
- *              '004_Flower_': ['A', 'B', 'C', 'D', 'E'],
- *              '034_Carrot_': ['A', 'B', 'C', 'D', 'E'],
- *              '049_Nutsy_': ['A', 'B', 'C', 'D', 'E']
- *          },
- *          {
- *              '005_Mushroom_1_': ['A', 'B', 'C', 'D', 'E', 'F'],
- *              '005_Mushroom_2_': ['A', 'B', 'C'],
- *              '054_DevilBerry_': ['A', 'B', 'C', 'D', 'E']
- *          }
- *      ]
- *   }
- * };
- */
+export interface Battle {
+    active: boolean;
+    message?: Message;
+    monster?: Monster;
+    timer?: NodeJS.Timeout;
+}

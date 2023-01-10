@@ -1,22 +1,37 @@
 import { Client } from 'discord.js';
-import { TOKEN } from './config';
-import { checkIncomingMessage } from './helpers/message';
-import { start } from './tools/guild';
 import { logError } from './tools/logger';
-import { recordChanges } from './tools/member';
+import { start } from './start';
+import { executeCommand } from './tools/commands';
+import { PLAYER_ROLE_ID, TOKEN } from './config';
 
-const bot = new Client({
-    intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent']
+const client = new Client({
+    intents: ['Guilds', 'GuildMessages', 'GuildPresences', 'GuildMembers', 'MessageContent'],
+    rest: {
+       timeout: 30_000
+    }
 });
 
-bot.login(TOKEN);
+client.login(TOKEN);
 
-bot.on('ready', () => start([...bot.guilds.cache.values()]));
-bot.on('messageCreate', async message => checkIncomingMessage(message));
-bot.on('guildMemberUpdate', (a, member) => {
-    recordChanges(member);
+client.on('ready', async () => {
+    start();
 });
 
-bot.on('error', error => {
-    logError(error);
+client.on('messageCreate', message => {
+    executeCommand(message);
+});
+
+client.on('guildMemberAdd', async member => {
+    const role = await member.guild.roles.fetch(PLAYER_ROLE_ID || '');
+
+    if (!role) {
+        logError('NO ROLE', 'on-guildMemberAdd');
+        return;
+    }
+
+    member.roles.add(role);
+});
+
+client.on('error', error => {
+    logError(error, 'client');
 });
